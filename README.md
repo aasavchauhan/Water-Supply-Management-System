@@ -1,6 +1,6 @@
-# Water Supply Management System
+# Water Supply Management System 💧
 
-A comprehensive water irrigation supply management system designed for managing farmer accounts, tracking water supply sessions, recording payments, and generating reports. Built with mobile-first approach and fully responsive for desktop use.
+A mobile-first Progressive Web Application (PWA) for managing water irrigation supply for farmers. Track supply sessions, record payments, generate reports, and manage farmer accounts seamlessly on both mobile and desktop.
 
 ## Features
 
