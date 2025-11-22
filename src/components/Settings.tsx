@@ -1,312 +1,268 @@
-import { useState } from 'react';
-import { useData } from '@/context/DataContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { Settings as SettingsIcon, Save, Sparkles, DollarSign, Info, Download, Upload, Database } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useData } from '../context/DataContext';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { toast } from 'sonner@2.0.3';
+import { Settings as SettingsIcon, Download, Upload } from 'lucide-react';
+import { db } from '../services/database';
 
-export default function Settings() {
-  const { settings, updateSettings } = useData();
+export function Settings() {
+  const { settings, updateSettings, farmers, supplyEntries, payments } = useData();
+  
+  const [formData, setFormData] = useState(settings || {
+    businessName: '',
+    businessAddress: '',
+    defaultHourlyRate: 100,
+    currency: 'INR',
+    currencySymbol: '₹',
+    timezone: 'Asia/Kolkata',
+    dateFormat: 'DD/MM/YYYY',
+    timeFormat: '24h',
+  });
 
-  const [formData, setFormData] = useState(settings);
+  useEffect(() => {
+    if (settings) {
+      setFormData(settings);
+    }
+  }, [settings]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.businessName.trim()) {
-      toast.error('Business name is required');
-      return;
-    }
-
-    if (formData.defaultRate <= 0) {
-      toast.error('Default rate must be greater than 0');
-      return;
-    }
-
     updateSettings(formData);
-    toast.success('Settings saved successfully');
+    toast.success('Settings updated successfully');
   };
 
-  const handleExportData = () => {
-    try {
-      const allData = {
-        farmers: localStorage.getItem('farmers'),
-        supplyEntries: localStorage.getItem('supplyEntries'),
-        payments: localStorage.getItem('payments'),
-        settings: localStorage.getItem('settings'),
-        exportDate: new Date().toISOString(),
-        version: '1.0.0'
-      };
+  const handleBackup = () => {
+    const data = {
+      farmers,
+      supplyEntries,
+      payments,
+      settings,
+      exportedAt: new Date().toISOString(),
+    };
 
-      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `water-supply-backup-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast.success('Data exported successfully');
-    } catch (error) {
-      toast.error('Failed to export data');
-      console.error(error);
-    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `water-supply-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    toast.success('Backup downloaded successfully');
   };
 
-  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRestore = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const data = JSON.parse(event.target?.result as string);
         
-        if (data.farmers) localStorage.setItem('farmers', data.farmers);
-        if (data.supplyEntries) localStorage.setItem('supplyEntries', data.supplyEntries);
-        if (data.payments) localStorage.setItem('payments', data.payments);
-        if (data.settings) localStorage.setItem('settings', data.settings);
-
-        toast.success('Data imported successfully! Reloading page...');
-        setTimeout(() => window.location.reload(), 1500);
+        if (confirm('This will replace all existing data. Are you sure you want to restore from this backup?')) {
+          // Save to IndexedDB
+          await db.saveFarmers(data.farmers || []);
+          await db.saveSupplyEntries(data.supplyEntries || []);
+          await db.savePayments(data.payments || []);
+          await db.saveSettings(data.settings || settings);
+          
+          toast.success('Backup restored successfully. Reloading page...');
+          setTimeout(() => window.location.reload(), 1000);
+        }
       } catch (error) {
         toast.error('Invalid backup file');
-        console.error(error);
       }
     };
     reader.readAsText(file);
+    
+    // Reset input
+    e.target.value = '';
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="animate-fade-in">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-gradient-primary rounded-xl shadow-lg">
-            <SettingsIcon className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-            <p className="text-gray-500 mt-1">Configure your system preferences</p>
-          </div>
-        </div>
+    <div className="space-y-6 max-w-3xl">
+      <div>
+        <h1>Settings</h1>
+        <p className="text-muted-foreground">
+          Configure system settings and preferences
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* Business Information */}
-        <Card className="shadow-xl border-2 animate-slide-up">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-transparent border-b-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-xl">Business Information</CardTitle>
-            </div>
-            <CardDescription>Update your business details</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
+      {/* Business Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="businessName">Business Name *</Label>
               <Input
                 id="businessName"
                 value={formData.businessName}
                 onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                placeholder="Enter business name"
                 required
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="contactNumber">Contact Number</Label>
-                <Input
-                  id="contactNumber"
-                  type="tel"
-                  value={formData.contactNumber}
-                  onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-                  placeholder="Enter contact number"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Enter email address"
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="businessAddress">Business Address</Label>
               <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Enter business address"
+                id="businessAddress"
+                value={formData.businessAddress}
+                onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
+                placeholder="Enter your business address"
                 rows={3}
               />
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Billing Settings */}
-        <Card className="mt-6 shadow-xl border-2 animate-scale-in">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-transparent border-b-2">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              <CardTitle className="text-xl">Billing Settings</CardTitle>
-            </div>
-            <CardDescription>Configure default billing parameters</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="defaultRate">Default Rate (₹/hour) *</Label>
-                <Input
-                  id="defaultRate"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.defaultRate}
-                  onChange={(e) => setFormData({ ...formData, defaultRate: parseFloat(e.target.value) })}
-                  required
-                />
-                <p className="text-sm text-gray-500">This rate will be used for new farmers</p>
-              </div>
+            <Button type="submit">
+              Save Business Information
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="waterFlowRate">Water Flow Rate (L/hour)</Label>
-                <Input
-                  id="waterFlowRate"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.waterFlowRate || ''}
-                  onChange={(e) => setFormData({ ...formData, waterFlowRate: parseFloat(e.target.value) || undefined })}
-                  placeholder="1000"
-                />
-                <p className="text-sm text-gray-500">For water usage calculations</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <Input
-                  id="currency"
-                  value={formData.currency}
-                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                  placeholder="INR"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dateFormat">Date Format</Label>
-                <Input
-                  id="dateFormat"
-                  value={formData.dateFormat}
-                  onChange={(e) => setFormData({ ...formData, dateFormat: e.target.value })}
-                  placeholder="dd/MM/yyyy"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Save Button */}
-        <div className="flex justify-end mt-6">
-          <Button type="submit" size="lg" className="shadow-lg hover:shadow-xl transition-all">
-            <Save className="h-4 w-4 mr-2" />
-            Save Settings
-          </Button>
-        </div>
-      </form>
-
-      {/* Data Management */}
-      <Card className="shadow-xl border-2 animate-scale-in">
-        <CardHeader className="bg-gradient-to-r from-orange-50 to-transparent border-b-2">
-          <div className="flex items-center gap-2">
-            <Database className="h-5 w-5 text-orange-600" />
-            <CardTitle className="text-xl">Data Management</CardTitle>
-          </div>
-          <CardDescription>Backup and restore your data</CardDescription>
+      {/* Rate Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Default Rate Configuration</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <div className="p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 font-medium mb-2">⚠️ Important</p>
-              <p className="text-xs text-yellow-700">
-                Your data is stored locally in your browser. Clearing browser data will delete all records. 
-                It's recommended to export backups regularly.
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="defaultRate">Default Hourly Rate (₹) *</Label>
+              <Input
+                id="defaultRate"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.defaultHourlyRate}
+                onChange={(e) => setFormData({ ...formData, defaultHourlyRate: Number(e.target.value) })}
+                required
+              />
+              <p className="text-sm text-muted-foreground">
+                This rate will be used as default for new farmers
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <Button
-                onClick={handleExportData}
-                variant="outline"
-                className="h-auto py-4 flex-col items-start shadow-lg hover:shadow-xl transition-all"
-              >
-                <div className="flex items-center gap-2 mb-2 w-full">
-                  <Download className="h-5 w-5 text-blue-600" />
-                  <span className="font-semibold">Export Data</span>
-                </div>
-                <span className="text-xs text-gray-500 text-left">
-                  Download all data as JSON backup file
-                </span>
+            <div className="space-y-2">
+              <Label>Half-hour Rate</Label>
+              <Input
+                value={`₹${(formData.defaultHourlyRate / 2).toFixed(2)}`}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-sm text-muted-foreground">
+                Automatically calculated as half of hourly rate
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rounding">Time Rounding (minutes)</Label>
+              <Input
+                id="rounding"
+                type="number"
+                min="1"
+                max="60"
+                value={formData.timeRoundingMinutes}
+                onChange={(e) => setFormData({ ...formData, timeRoundingMinutes: Number(e.target.value) })}
+              />
+              <p className="text-sm text-muted-foreground">
+                Common values: 15 or 30 minutes
+              </p>
+            </div>
+
+            <Button type="submit">
+              Save Rate Settings
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Data Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Data Backup & Restore</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Backup your data regularly to prevent data loss. You can restore data from a previously saved backup.
+            </p>
+            
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={handleBackup} variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Download Backup
               </Button>
 
               <div>
                 <input
                   type="file"
-                  accept="application/json"
-                  onChange={handleImportData}
+                  accept=".json"
+                  onChange={handleRestore}
                   className="hidden"
-                  id="import-data"
+                  id="restore-file"
                 />
-                <Button
-                  onClick={() => document.getElementById('import-data')?.click()}
-                  variant="outline"
-                  className="h-auto py-4 flex-col items-start w-full shadow-lg hover:shadow-xl transition-all"
-                >
-                  <div className="flex items-center gap-2 mb-2 w-full">
-                    <Upload className="h-5 w-5 text-green-600" />
-                    <span className="font-semibold">Import Data</span>
-                  </div>
-                  <span className="text-xs text-gray-500 text-left">
-                    Restore data from backup file
-                  </span>
+                <Button variant="outline" onClick={() => document.getElementById('restore-file')?.click()}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Restore from Backup
                 </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-muted p-4 rounded-lg">
+            <h4 className="mb-2">Current Data Summary</h4>
+            <div className="grid gap-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Farmers:</span>
+                <span>{farmers.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Supply Sessions:</span>
+                <span>{supplyEntries.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Payment Records:</span>
+                <span>{payments.length}</span>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* App Information */}
-      <Card className="shadow-lg border-2">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-transparent border-b-2">
-          <div className="flex items-center gap-2">
-            <Info className="h-5 w-5 text-purple-600" />
-            <CardTitle className="text-xl">About</CardTitle>
-          </div>
+      {/* Future Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Future Features</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="text-sm text-gray-600 space-y-2">
-            <p><strong>Application:</strong> Water Supply Management System</p>
-            <p><strong>Version:</strong> 1.0.0</p>
-            <p><strong>Storage:</strong> LocalStorage (Browser)</p>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
-              <p className="text-xs text-blue-700">
-                💡 Tip: Your data is stored locally in your browser. Export reports regularly as backup.
-              </p>
+        <CardContent>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <SettingsIcon className="h-4 w-4 mt-0.5" />
+              <div>
+                <p>SMS/WhatsApp Notifications</p>
+                <p className="text-xs">Send automated notifications to farmers</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <SettingsIcon className="h-4 w-4 mt-0.5" />
+              <div>
+                <p>Smart Meter Integration</p>
+                <p className="text-xs">Connect with IoT water meters for automatic readings</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <SettingsIcon className="h-4 w-4 mt-0.5" />
+              <div>
+                <p>Mobile App</p>
+                <p className="text-xs">Record supply sessions from your mobile device</p>
+              </div>
             </div>
           </div>
         </CardContent>

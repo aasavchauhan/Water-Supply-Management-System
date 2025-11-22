@@ -1,135 +1,87 @@
-// Core types for Water Supply Management System
+export interface User {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin: string | null;
+  isActive: boolean;
+  password?: string; // Only used for auth, never exposed to frontend
+}
 
 export interface Farmer {
   id: string;
+  userId: string | null;
   name: string;
   mobile: string;
-  farmLocation: string;
+  farmLocation: string | null;
   defaultRate: number;
-  balance: number;
-  totalSupplies?: number;
-  totalWaterUsed?: number;
-  totalHours?: number;
-  lastSupplyDate?: string;
-  isActive?: boolean;
+  balance: number; // negative = due, positive = advance
   createdAt: string;
   updatedAt: string;
+  isActive: boolean;
 }
 
 export interface SupplyEntry {
   id: string;
+  userId: string | null;
   farmerId: string;
-  farmerName?: string;
   date: string;
-  billingMethod: 'meter' | 'time';
-  
-  // Meter-based fields
-  meterReadingStart?: number;
-  meterReadingEnd?: number;
-  
-  // Time-based fields
-  startTime?: string;
-  stopTime?: string;
-  pauseDuration?: number;
-  
-  // Common fields
-  totalTimeUsed: number;
-  waterUsed?: number;
-  rate: number;
-  amount: number;
-  remarks?: string;
-  
+  billingMethod: 'time' | 'meter';
+  startTime: string | null;
+  stopTime: string | null;
+  pauseDuration: number; // in hours (for time-based billing)
+  meterReadingStart: number; // in h.mm format (e.g., 5.30 = 5h 30m)
+  meterReadingEnd: number; // in h.mm format
+  totalWaterUsed: number; // liters (calculated)
+  totalTimeUsed: number; // in hours (calculated)
+  rate: number; // ₹/hour
+  amount: number; // calculated: totalTimeUsed × rate
+  remarks: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Payment {
   id: string;
+  userId: string | null;
   farmerId: string;
-  farmerName?: string;
   paymentDate: string;
   amount: number;
-  paymentMethod: 'cash' | 'upi' | 'bank_transfer' | 'cheque' | 'other';
-  transactionId?: string;
-  remarks?: string;
+  paymentMethod: string | null;
+  transactionId: string | null;
+  remarks: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Settings {
+  id: string;
+  userId: string;
   businessName: string;
-  contactNumber: string;
-  email: string;
-  address: string;
-  defaultRate: number;
+  businessAddress: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
+  defaultHourlyRate: number;
   currency: string;
+  currencySymbol: string;
+  timezone: string;
   dateFormat: string;
-  waterFlowRate?: number;
+  timeFormat: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface DashboardStats {
-  totalFarmers: number;
-  totalWaterSupplied: number;
-  totalHours: number;
-  totalCharges: number;
-  totalPayments: number;
-  pendingDues: number;
-  todayRevenue: number;
-  todaySupplies: number;
-}
-
-export interface FarmerStats {
-  totalSupplies: number;
-  totalWaterUsed: number;
-  totalHours: number;
-  totalCharges: number;
-  totalPayments: number;
-  currentBalance: number;
-}
-
-export interface ReportFilter {
-  fromDate: string;
-  toDate: string;
-  farmerId?: string;
-}
-
-export interface FarmerReport {
-  farmerId: string;
-  farmerName: string;
-  mobile: string;
-  totalSupplies: number;
-  waterUsed: number;
-  totalCharges: number;
-  paymentsReceived: number;
-  balance: number;
-}
-
-// Form data types
-export interface SupplyFormData {
-  farmerId: string;
-  date: string;
-  billingMethod: 'meter' | 'time';
-  meterReadingStart: string;
-  meterReadingEnd: string;
-  startTime: string;
-  stopTime: string;
-  pauseDuration: string;
-  rate: string;
-  remarks: string;
-}
-
-export interface FarmerFormData {
-  name: string;
-  mobile: string;
-  farmLocation: string;
-  defaultRate: string;
-}
-
-export interface PaymentFormData {
-  farmerId: string;
-  paymentDate: string;
-  amount: string;
-  paymentMethod: 'cash' | 'upi' | 'bank_transfer' | 'cheque' | 'other';
-  transactionId: string;
-  remarks: string;
+export interface AuditLog {
+  id: string;
+  userId: string | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  oldValues: Record<string, any> | null;
+  newValues: Record<string, any> | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
 }

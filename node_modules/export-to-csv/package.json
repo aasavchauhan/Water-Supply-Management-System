@@ -1,0 +1,51 @@
+{
+  "name": "export-to-csv",
+  "version": "1.4.0",
+  "description": "Easily create CSV data from json collection",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexcaza/export-to-csv.git"
+  },
+  "scripts": {
+    "build": "rm -rf output && bun build index.ts --outdir ./output --minify && tsc",
+    "watch": "rm -rf output && bun build index.ts --outdir ./output --minify --watch",
+    "e2e": "rm -rf integration/export-to-csv.js && bun run build && cp output/index.js integration/export-to-csv.js && playwright test",
+    "e2e-ci": "rm -rf integration/export-to-csv.js && bun run build && cp output/index.js integration/export-to-csv.js && bunx playwright install --with-deps && playwright test",
+    "e2e-server": "bunx http-server ./integration -p 3000",
+    "test": "bun test lib/__specs__/",
+    "format": "bunx prettier --write '.'",
+    "prepublishOnly": "bun run build",
+    "prepare": "bun run build"
+  },
+  "keywords": [
+    "export-to-csv",
+    "export-to-excel",
+    "csv",
+    "excel",
+    "libreoffice",
+    "openoffice",
+    "typescript",
+    "zero-dependencies"
+  ],
+  "author": "alexcaza",
+  "email": "alex@alexcaza.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexcaza/export-to-csv/issues"
+  },
+  "exports": "./output/index.js",
+  "types": "./output/index.d.ts",
+  "engines": {
+    "node": "^v12.20.0 || >=v14.13.0"
+  },
+  "homepage": "https://github.com/alexcaza/export-to-csv#readme",
+  "devDependencies": {
+    "@playwright/test": "1.40.0",
+    "bun-types": "^1.0.28",
+    "http-server": "^14.1.1",
+    "prettier": "3.0.3",
+    "bun": "~1.0.28",
+    "typescript": "~5.3.3"
+  }
+}

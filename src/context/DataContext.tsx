@@ -1,221 +1,208 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Farmer, SupplyEntry, Payment, Settings } from '@/types';
-import { calculateFarmerBalance, getTodayDate } from '@/utils/calculations';
+import { Farmer, SupplyEntry, Payment, Settings } from '../types';
+import { apiService } from '../services/api.service';
+import { useAuth } from './AuthContext';
+import { toast } from 'sonner';
 
 interface DataContextType {
   farmers: Farmer[];
   supplyEntries: SupplyEntry[];
   payments: Payment[];
-  settings: Settings;
-  addFarmer: (farmer: Omit<Farmer, 'id' | 'createdAt' | 'updatedAt' | 'balance'>) => void;
-  updateFarmer: (id: string, farmer: Partial<Farmer>) => void;
-  deleteFarmer: (id: string) => void;
-  addSupplyEntry: (entry: Omit<SupplyEntry, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateSupplyEntry: (id: string, entry: Partial<SupplyEntry>) => void;
-  deleteSupplyEntry: (id: string) => void;
-  addPayment: (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updatePayment: (id: string, payment: Partial<Payment>) => void;
-  deletePayment: (id: string) => void;
-  updateSettings: (settings: Partial<Settings>) => void;
-  refreshBalances: () => void;
+  settings: Settings | null;
+  isLoading: boolean;
+  addFarmer: (farmer: Omit<Farmer, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'balance' | 'isActive'>) => Promise<void>;
+  updateFarmer: (id: string, farmer: Partial<Farmer>) => Promise<void>;
+  deleteFarmer: (id: string) => Promise<void>;
+  addSupplyEntry: (entry: Omit<SupplyEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => Promise<void>;
+  addPayment: (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => Promise<void>;
+  updateSettings: (settings: Partial<Settings>) => Promise<void>;
+  getFarmerById: (id: string) => Farmer | undefined;
+  refreshData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-const STORAGE_KEYS = {
-  FARMERS: 'farmers',
-  SUPPLY_ENTRIES: 'supplyEntries',
-  PAYMENTS: 'payments',
-  SETTINGS: 'settings',
-};
-
-const defaultSettings: Settings = {
-  businessName: 'Kumar Water Supply Services',
-  contactNumber: '',
-  email: '',
-  address: '',
-  defaultRate: 100.00,
+const DEFAULT_SETTINGS: Partial<Settings> = {
+  defaultHourlyRate: 100,
+  businessName: 'Water Irrigation Supply',
   currency: 'INR',
-  dateFormat: 'dd/MM/yyyy',
-  waterFlowRate: 1000,
+  currencySymbol: '₹',
+  timezone: 'Asia/Kolkata',
+  dateFormat: 'DD/MM/YYYY',
+  timeFormat: '24h',
 };
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuth();
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [supplyEntries, setSupplyEntries] = useState<SupplyEntry[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [settings, setSettings] = useState<Settings | null>({
+    id: 'temp',
+    userId: '',
+    defaultHourlyRate: 100,
+    businessName: 'Water Irrigation Supply',
+    currency: 'INR',
+    currencySymbol: '₹',
+    timezone: 'Asia/Kolkata',
+    dateFormat: 'DD/MM/YYYY',
+    timeFormat: '24h',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load data from localStorage on mount
+  const refreshData = async () => {
+    if (!isAuthenticated || !user) return;
+    
+    setIsLoading(true);
+    try {
+      const [fetchedFarmers, fetchedEntries, fetchedPayments, fetchedSettings] = await Promise.all([
+        apiService.getFarmers(),
+        apiService.getSupplyEntries(),
+        apiService.getPayments(),
+        apiService.getSettings(),
+      ]);
+
+      setFarmers(fetchedFarmers);
+      setSupplyEntries(fetchedEntries);
+      setPayments(fetchedPayments);
+      setSettings(fetchedSettings || {
+        id: 'temp',
+        userId: user.id,
+        defaultHourlyRate: 100,
+        businessName: 'Water Irrigation Supply',
+        currency: 'INR',
+        currencySymbol: '₹',
+        timezone: 'Asia/Kolkata',
+        dateFormat: 'DD/MM/YYYY',
+        timeFormat: '24h',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      console.error('Failed to load data:', error);
+      toast.error('Failed to load data from database');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load data when authenticated
   useEffect(() => {
-    const loadedFarmers = localStorage.getItem(STORAGE_KEYS.FARMERS);
-    const loadedEntries = localStorage.getItem(STORAGE_KEYS.SUPPLY_ENTRIES);
-    const loadedPayments = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
-    const loadedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+    if (isAuthenticated) {
+      refreshData();
+    } else {
+      setFarmers([]);
+      setSupplyEntries([]);
+      setPayments([]);
+      setSettings(null);
+    }
+  }, [isAuthenticated]);
 
-    if (loadedFarmers) setFarmers(JSON.parse(loadedFarmers));
-    if (loadedEntries) setSupplyEntries(JSON.parse(loadedEntries));
-    if (loadedPayments) setPayments(JSON.parse(loadedPayments));
-    if (loadedSettings) setSettings(JSON.parse(loadedSettings));
-  }, []);
+  const addFarmer = async (farmer: Omit<Farmer, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'balance' | 'isActive'>) => {
+    try {
+      const newFarmer = await apiService.createFarmer(farmer);
+      setFarmers([...farmers, newFarmer]);
+      toast.success('Farmer added successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add farmer');
+      throw error;
+    }
+  };
 
-  // Save to localStorage whenever data changes
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FARMERS, JSON.stringify(farmers));
-  }, [farmers]);
+  const updateFarmer = async (id: string, updates: Partial<Farmer>) => {
+    try {
+      const updatedFarmer = await apiService.updateFarmer(id, updates);
+      setFarmers(farmers.map(f => f.id === id ? updatedFarmer : f));
+      toast.success('Farmer updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update farmer');
+      throw error;
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SUPPLY_ENTRIES, JSON.stringify(supplyEntries));
-  }, [supplyEntries]);
+  const deleteFarmer = async (id: string) => {
+    try {
+      await apiService.deleteFarmer(id);
+      setFarmers(farmers.filter(f => f.id !== id));
+      toast.success('Farmer deleted successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete farmer');
+      throw error;
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
-  }, [payments]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-  }, [settings]);
-
-  // Refresh farmer balances
-  const refreshBalances = () => {
-    setFarmers(prev => prev.map(farmer => {
-      const farmerSupplies = supplyEntries.filter(e => e.farmerId === farmer.id);
-      const farmerPayments = payments.filter(p => p.farmerId === farmer.id);
-      const balance = calculateFarmerBalance(farmerSupplies, farmerPayments);
+  const addSupplyEntry = async (entry: Omit<SupplyEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+    try {
+      const newEntry = await apiService.createSupplyEntry(entry);
+      setSupplyEntries([...supplyEntries, newEntry]);
       
-      return {
-        ...farmer,
-        balance,
-        totalSupplies: farmerSupplies.length,
-        totalWaterUsed: farmerSupplies.reduce((sum, e) => sum + (e.waterUsed || 0), 0),
-        totalHours: farmerSupplies.reduce((sum, e) => sum + e.totalTimeUsed, 0),
-        lastSupplyDate: farmerSupplies.length > 0 
-          ? farmerSupplies.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date 
-          : undefined,
-      };
-    }));
+      // Refresh farmers to get updated balance
+      await refreshData();
+      toast.success('Supply entry added successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add supply entry');
+      throw error;
+    }
   };
 
-  // Farmer operations
-  const addFarmer = (farmer: Omit<Farmer, 'id' | 'createdAt' | 'updatedAt' | 'balance'>) => {
-    const now = new Date().toISOString();
-    const newFarmer: Farmer = {
-      ...farmer,
-      id: uuidv4(),
-      balance: 0,
-      totalSupplies: 0,
-      totalWaterUsed: 0,
-      totalHours: 0,
-      isActive: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setFarmers(prev => [...prev, newFarmer]);
+  const addPayment = async (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+    try {
+      const newPayment = await apiService.createPayment(payment);
+      setPayments([...payments, newPayment]);
+      
+      // Refresh farmers to get updated balance
+      await refreshData();
+      toast.success('Payment added successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add payment');
+      throw error;
+    }
   };
 
-  const updateFarmer = (id: string, updates: Partial<Farmer>) => {
-    setFarmers(prev => prev.map(farmer => 
-      farmer.id === id 
-        ? { ...farmer, ...updates, updatedAt: new Date().toISOString() } 
-        : farmer
-    ));
+  const updateSettings = async (newSettings: Partial<Settings>) => {
+    try {
+      const updated = await apiService.updateSettings(newSettings);
+      setSettings(updated);
+      toast.success('Settings updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update settings');
+      throw error;
+    }
   };
 
-  const deleteFarmer = (id: string) => {
-    setFarmers(prev => prev.filter(farmer => farmer.id !== id));
-    setSupplyEntries(prev => prev.filter(entry => entry.farmerId !== id));
-    setPayments(prev => prev.filter(payment => payment.farmerId !== id));
+  const getFarmerById = (id: string) => {
+    return farmers.find(f => f.id === id);
   };
 
-  // Supply Entry operations
-  const addSupplyEntry = (entry: Omit<SupplyEntry, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString();
-    const farmer = farmers.find(f => f.id === entry.farmerId);
-    const newEntry: SupplyEntry = {
-      ...entry,
-      id: uuidv4(),
-      farmerName: farmer?.name,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setSupplyEntries(prev => [...prev, newEntry]);
-    setTimeout(refreshBalances, 100);
-  };
-
-  const updateSupplyEntry = (id: string, updates: Partial<SupplyEntry>) => {
-    setSupplyEntries(prev => prev.map(entry => 
-      entry.id === id 
-        ? { ...entry, ...updates, updatedAt: new Date().toISOString() } 
-        : entry
-    ));
-    setTimeout(refreshBalances, 100);
-  };
-
-  const deleteSupplyEntry = (id: string) => {
-    setSupplyEntries(prev => prev.filter(entry => entry.id !== id));
-    setTimeout(refreshBalances, 100);
-  };
-
-  // Payment operations
-  const addPayment = (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString();
-    const farmer = farmers.find(f => f.id === payment.farmerId);
-    const newPayment: Payment = {
-      ...payment,
-      id: uuidv4(),
-      farmerName: farmer?.name,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setPayments(prev => [...prev, newPayment]);
-    setTimeout(refreshBalances, 100);
-  };
-
-  const updatePayment = (id: string, updates: Partial<Payment>) => {
-    setPayments(prev => prev.map(payment => 
-      payment.id === id 
-        ? { ...payment, ...updates, updatedAt: new Date().toISOString() } 
-        : payment
-    ));
-    setTimeout(refreshBalances, 100);
-  };
-
-  const deletePayment = (id: string) => {
-    setPayments(prev => prev.filter(payment => payment.id !== id));
-    setTimeout(refreshBalances, 100);
-  };
-
-  // Settings operations
-  const updateSettings = (updates: Partial<Settings>) => {
-    setSettings(prev => ({ ...prev, ...updates }));
-  };
-
-  const value: DataContextType = {
-    farmers,
-    supplyEntries,
-    payments,
-    settings,
-    addFarmer,
-    updateFarmer,
-    deleteFarmer,
-    addSupplyEntry,
-    updateSupplyEntry,
-    deleteSupplyEntry,
-    addPayment,
-    updatePayment,
-    deletePayment,
-    updateSettings,
-    refreshBalances,
-  };
-
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+  return (
+    <DataContext.Provider
+      value={{
+        farmers,
+        supplyEntries,
+        payments,
+        settings,
+        isLoading,
+        addFarmer,
+        updateFarmer,
+        deleteFarmer,
+        addSupplyEntry,
+        addPayment,
+        updateSettings,
+        getFarmerById,
+        refreshData,
+      }}
+    >
+      {children}
+    </DataContext.Provider>
+  );
 }
 
 export function useData() {
   const context = useContext(DataContext);
-  if (context === undefined) {
-    throw new Error('useData must be used within a DataProvider');
+  if (!context) {
+    throw new Error('useData must be used within DataProvider');
   }
   return context;
 }

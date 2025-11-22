@@ -1,357 +1,384 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useData } from '@/context/DataContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Trash2, User, Droplets, DollarSign, TrendingUp, Calendar } from 'lucide-react';
-import { toast } from 'sonner';
-import { PaymentFormData } from '@/types';
-import { formatCurrency, formatDate, getFarmerStats, getTodayDate, getFirstDayOfMonth } from '@/utils/calculations';
+import { useData } from '../context/DataContext';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { ArrowLeft, IndianRupee, Droplets, Clock, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Textarea } from './ui/textarea';
+import { toast } from 'sonner@2.0.3';
 
-export default function FarmerProfile() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { farmers, supplyEntries, payments, addPayment, deletePayment } = useData();
+interface FarmerProfileProps {
+  farmerId: string;
+  onBack: () => void;
+}
 
-  const [fromDate, setFromDate] = useState(getFirstDayOfMonth());
-  const [toDate, setToDate] = useState(getTodayDate());
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+export function FarmerProfile({ farmerId, onBack }: FarmerProfileProps) {
+  const { farmers, supplyEntries, payments, addPayment } = useData();
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [dateFilter, setDateFilter] = useState({
+    from: '',
+    to: '',
+  });
 
-  const [paymentForm, setPaymentForm] = useState<PaymentFormData>({
-    farmerId: id || '',
-    paymentDate: getTodayDate(),
-    amount: '',
-    paymentMethod: 'cash',
-    transactionId: '',
+  const [paymentForm, setPaymentForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    amount: 0,
+    mode: 'Cash' as 'Cash' | 'Online' | 'Other',
     remarks: '',
   });
 
-  const farmer = farmers.find(f => f.id === id);
+  const farmer = farmers.find(f => f.id === farmerId);
 
   if (!farmer) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Farmer not found</p>
-        <Button onClick={() => navigate('/farmers')} className="mt-4">
-          Back to Farmers
-        </Button>
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Farmer not found</p>
+        <Button onClick={onBack} className="mt-4">Go Back</Button>
       </div>
     );
   }
 
-  const farmerSupplies = supplyEntries.filter(e => e.farmerId === id);
-  const farmerPayments = payments.filter(p => p.farmerId === id);
+  // Filter entries for this farmer
+  let farmerEntries = supplyEntries.filter(e => e.farmerId === farmerId);
+  let farmerPayments = payments.filter(p => p.farmerId === farmerId);
 
-  // Filter by date range
-  const filteredSupplies = farmerSupplies.filter(e => {
-    const date = new Date(e.date);
-    return date >= new Date(fromDate) && date <= new Date(toDate);
-  });
+  // Apply date filter
+  if (dateFilter.from) {
+    farmerEntries = farmerEntries.filter(e => e.date >= dateFilter.from);
+    farmerPayments = farmerPayments.filter(p => p.date >= dateFilter.from);
+  }
+  if (dateFilter.to) {
+    farmerEntries = farmerEntries.filter(e => e.date <= dateFilter.to);
+    farmerPayments = farmerPayments.filter(p => p.date <= dateFilter.to);
+  }
 
-  const filteredPayments = farmerPayments.filter(p => {
-    const date = new Date(p.paymentDate);
-    return date >= new Date(fromDate) && date <= new Date(toDate);
-  });
-
-  const stats = getFarmerStats(farmerSupplies, farmerPayments);
+  // Calculate totals
+  const totalHours = farmerEntries.reduce((sum, e) => sum + e.totalTimeUsed, 0);
+  const totalWater = farmerEntries.reduce((sum, e) => sum + e.totalWaterUsed, 0);
+  const totalCharges = farmerEntries.reduce((sum, e) => sum + e.amount, 0);
+  const totalPaid = farmerPayments.reduce((sum, p) => sum + p.amount, 0);
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!paymentForm.amount || parseFloat(paymentForm.amount) <= 0) {
-      toast.error('Please enter a valid amount');
+    if (paymentForm.amount <= 0) {
+      toast.error('Please enter a valid payment amount');
       return;
     }
 
     addPayment({
-      farmerId: farmer.id,
-      paymentDate: paymentForm.paymentDate,
-      amount: parseFloat(paymentForm.amount),
-      paymentMethod: paymentForm.paymentMethod,
-      transactionId: paymentForm.transactionId || undefined,
-      remarks: paymentForm.remarks || undefined,
+      farmerId,
+      date: paymentForm.date,
+      amount: paymentForm.amount,
+      mode: paymentForm.mode,
+      remarks: paymentForm.remarks,
     });
 
     toast.success('Payment recorded successfully');
-    setPaymentDialogOpen(false);
+    setIsPaymentDialogOpen(false);
     setPaymentForm({
-      ...paymentForm,
-      amount: '',
-      transactionId: '',
+      date: new Date().toISOString().split('T')[0],
+      amount: 0,
+      mode: 'Cash',
       remarks: '',
     });
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="animate-fade-in">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" size="icon" onClick={() => navigate('/farmers')} className="hover:scale-105 transition-transform">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-3 flex-1">
-            <div className="p-3 bg-gradient-primary rounded-xl shadow-lg">
-              <User className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{farmer.name}</h1>
-              <p className="text-gray-500 mt-1">{farmer.mobile} • {farmer.farmLocation || 'No location'}</p>
-            </div>
-          </div>
-          <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="shadow-lg hover:shadow-xl transition-all">
-                <Plus className="h-4 w-4 mr-2" />
-                Record Payment
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-            <form onSubmit={handlePaymentSubmit}>
-              <DialogHeader>
-                <DialogTitle>Record Payment</DialogTitle>
-                <DialogDescription>Add a new payment for {farmer.name}</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Payment Date *</Label>
-                    <Input
-                      type="date"
-                      value={paymentForm.paymentDate}
-                      onChange={(e) => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Amount (₹) *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={paymentForm.amount}
-                      onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Payment Method *</Label>
-                  <Select 
-                    value={paymentForm.paymentMethod} 
-                    onValueChange={(value: any) => setPaymentForm({ ...paymentForm, paymentMethod: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="upi">UPI</SelectItem>
-                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="cheque">Cheque</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Transaction ID</Label>
-                  <Input
-                    value={paymentForm.transactionId}
-                    onChange={(e) => setPaymentForm({ ...paymentForm, transactionId: e.target.value })}
-                    placeholder="Optional"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Remarks</Label>
-                  <Input
-                    value={paymentForm.remarks}
-                    onChange={(e) => setPaymentForm({ ...paymentForm, remarks: e.target.value })}
-                    placeholder="Optional"
-                  />
-                </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <Button onClick={onBack} variant="outline" size="sm" className="self-start">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <div className="flex-1">
+          <h1>{farmer.name}</h1>
+          <p className="text-muted-foreground">
+            {farmer.mobile} • {farmer.farmLocation}
+          </p>
+        </div>
+        <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Record Payment</span>
+              <span className="sm:hidden">Payment</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Record Payment</DialogTitle>
+              <DialogDescription>Enter the payment details for {farmer.name}</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handlePaymentSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="payDate">Date *</Label>
+                <Input
+                  id="payDate"
+                  type="date"
+                  value={paymentForm.date}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })}
+                  required
+                />
               </div>
-              <DialogFooter>
-                <Button type="submit">Record Payment</Button>
-              </DialogFooter>
+
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (₹) *</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={paymentForm.amount}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, amount: Number(e.target.value) })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mode">Payment Mode *</Label>
+                <Select
+                  value={paymentForm.mode}
+                  onValueChange={(value: any) => setPaymentForm({ ...paymentForm, mode: value })}
+                >
+                  <SelectTrigger id="mode">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Cash">Cash</SelectItem>
+                    <SelectItem value="Online">Online</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payRemarks">Remarks</Label>
+                <Textarea
+                  id="payRemarks"
+                  value={paymentForm.remarks}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, remarks: e.target.value })}
+                  placeholder="Optional notes"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button type="submit" className="flex-1">
+                  Save Payment
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsPaymentDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>
-        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4 animate-slide-up">
-        <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 bg-gradient-to-br from-blue-50 to-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Total Supplies
-            </CardTitle>
+      {/* Account Summary */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>Total Hours</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-blue-600">{stats.totalSupplies}</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 bg-gradient-to-br from-purple-50 to-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Droplets className="h-4 w-4" />
-              Total Hours
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-purple-600">{stats.totalHours.toFixed(2)}h</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 bg-gradient-to-br from-green-50 to-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Total Charges
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">{formatCurrency(stats.totalCharges, '₹')}</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-2 bg-gradient-to-br from-orange-50 to-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Balance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className={`text-3xl font-bold ${stats.currentBalance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {formatCurrency(stats.currentBalance, '₹')}
+            <div className="text-2xl">{totalHours.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {farmerEntries.length} sessions
             </p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>Water Used</CardTitle>
+            <Droplets className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl">{totalWater.toLocaleString()} L</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total consumption
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>Total Charges</CardTitle>
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl">₹{totalCharges.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              ₹{totalPaid.toLocaleString()} paid
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>Balance</CardTitle>
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {farmer.balance === 0 ? (
+              <>
+                <div className="text-2xl text-green-600">Cleared</div>
+                <p className="text-xs text-muted-foreground mt-1">No dues</p>
+              </>
+            ) : farmer.balance > 0 ? (
+              <>
+                <div className="text-2xl text-green-600">+₹{farmer.balance.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">Advance</p>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl text-red-600">-₹{Math.abs(farmer.balance).toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground mt-1">Due</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Date Filters */}
-      <Card className="shadow-lg border-2 animate-scale-in">
-        <CardContent className="pt-6">
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <Label>From Date</Label>
-              <Input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="h-11"
-              />
-            </div>
-            <div className="flex-1">
-              <Label>To Date</Label>
-              <Input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="h-11"
-              />
-            </div>
-            <Button variant="outline" onClick={() => {
-              setFromDate(getFirstDayOfMonth());
-              setToDate(getTodayDate());
-            }} className="h-11">
-              Reset
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Supply Entries */}
-      <Card className="shadow-xl border-2">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-transparent border-b-2">
-          <CardTitle className="text-xl">Supply Entries ({filteredSupplies.length})</CardTitle>
+      {/* Date Filter */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filter by Date Range</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredSupplies.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No supply entries found</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Hours</TableHead>
-                  <TableHead>Rate</TableHead>
-                  <TableHead>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSupplies.map((entry) => (
-                  <TableRow key={entry.id} className="hover:bg-blue-50/50 transition-colors duration-200">
-                    <TableCell>{formatDate(entry.date)}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{entry.billingMethod}</Badge>
-                    </TableCell>
-                    <TableCell>{entry.totalTimeUsed.toFixed(2)}h</TableCell>
-                    <TableCell>₹{entry.rate}/hr</TableCell>
-                    <TableCell className="font-semibold">{formatCurrency(entry.amount, '₹')}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="from">From Date</Label>
+              <Input
+                id="from"
+                type="date"
+                value={dateFilter.from}
+                onChange={(e) => setDateFilter({ ...dateFilter, from: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="to">To Date</Label>
+              <Input
+                id="to"
+                type="date"
+                value={dateFilter.to}
+                onChange={(e) => setDateFilter({ ...dateFilter, to: e.target.value })}
+              />
+            </div>
+          </div>
+          {(dateFilter.from || dateFilter.to) && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => setDateFilter({ from: '', to: '' })}
+            >
+              Clear Filter
+            </Button>
           )}
         </CardContent>
       </Card>
 
-      {/* Payments */}
-      <Card className="shadow-xl border-2">
-        <CardHeader className="bg-gradient-to-r from-green-50 to-transparent border-b-2">
-          <CardTitle className="text-xl">Payment History ({filteredPayments.length})</CardTitle>
+      {/* Supply Sessions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Supply Sessions</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredPayments.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No payments found</p>
+          {farmerEntries.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No supply sessions found for this date range
+            </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPayments.map((payment) => (
-                  <TableRow key={payment.id} className="hover:bg-green-50/50 transition-colors duration-200">
-                    <TableCell>{formatDate(payment.paymentDate)}</TableCell>
-                    <TableCell className="font-semibold text-green-600">
-                      {formatCurrency(payment.amount, '₹')}
-                    </TableCell>
-                    <TableCell>
-                      <Badge>{payment.paymentMethod}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">{payment.transactionId || '-'}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          deletePayment(payment.id);
-                          toast.success('Payment deleted');
-                        }}
-                        className="hover:scale-110 transition-transform"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Water Used</TableHead>
+                    <TableHead>Rate</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Remarks</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {[...farmerEntries]
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {entry.startTime} - {entry.stopTime}
+                        </TableCell>
+                        <TableCell>{entry.totalTimeUsed.toFixed(2)} hrs</TableCell>
+                        <TableCell>{entry.totalWaterUsed.toLocaleString()} L</TableCell>
+                        <TableCell>₹{entry.rate}/hr</TableCell>
+                        <TableCell>₹{entry.amount.toLocaleString()}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {entry.remarks || '-'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Payment History */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {farmerPayments.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No payments recorded for this date range
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Mode</TableHead>
+                    <TableHead>Remarks</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...farmerPayments]
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-green-600">₹{payment.amount.toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{payment.mode}</Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {payment.remarks || '-'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -1,133 +1,235 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Home, Droplets, Users, FileText, Settings as SettingsIcon, Menu, X } from 'lucide-react';
-import { useState } from 'react';
-import Dashboard from './components/Dashboard';
-import SupplyEntryForm from './components/SupplyEntryForm';
-import FarmerManagement from './components/FarmerManagement';
-import FarmerProfile from './components/FarmerProfile';
-import Reports from './components/Reports';
-import Settings from './components/Settings';
-import { Toaster } from './components/ui/toaster';
-import { cn } from './lib/utils';
+import { useState, Suspense } from 'react';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { StackHandler, StackProvider, StackTheme } from '@stackframe/react';
+import { stackClientApp } from './stack';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
+import { Dashboard } from './components/Dashboard';
+import { SupplyEntryForm } from './components/SupplyEntryForm';
+import { FarmerManagement } from './components/FarmerManagement';
+import { FarmerProfile } from './components/FarmerProfile';
+import { Reports } from './components/Reports';
+import { Settings } from './components/Settings';
+import { Toaster } from './components/ui/sonner';
+import { Button } from './components/ui/button';
+import { 
+  LayoutDashboard, 
+  Droplets, 
+  Users, 
+  FileText, 
+  Settings as SettingsIcon,
+  Menu,
+  X,
+  LogOut
+} from 'lucide-react';
 
-function Navigation() {
-  const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: Home },
-    { path: '/supply', label: 'New Supply', icon: Droplets },
-    { path: '/farmers', label: 'Farmers', icon: Users },
-    { path: '/reports', label: 'Reports', icon: FileText },
-    { path: '/settings', label: 'Settings', icon: SettingsIcon },
+type Page = 
+  | 'dashboard' 
+  | 'new-supply' 
+  | 'farmers' 
+  | 'farmer-profile'
+  | 'reports' 
+  | 'settings';
+
+function MainApp() {
+  const { user, logout, isLoading } = useAuth();
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [selectedFarmerId, setSelectedFarmerId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Droplets className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not logged in, redirect to /handler/sign-in
+  if (!user) {
+    window.location.href = '/handler/sign-in';
+    return null;
+  }
+
+  const navigateTo = (page: Page, farmerId?: string) => {
+    setCurrentPage(page);
+    if (farmerId) {
+      setSelectedFarmerId(farmerId);
+    }
+    setIsSidebarOpen(false);
+  };
+
+  const menuItems = [
+    { id: 'dashboard' as Page, icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'new-supply' as Page, icon: Droplets, label: 'New Supply' },
+    { id: 'farmers' as Page, icon: Users, label: 'Farmers' },
+    { id: 'reports' as Page, icon: FileText, label: 'Reports' },
+    { id: 'settings' as Page, icon: SettingsIcon, label: 'Settings' },
   ];
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b-2 border-primary/10 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <div className="bg-gradient-to-br from-primary to-blue-600 p-2 rounded-xl shadow-lg">
-                <Droplets className="h-8 w-8 text-white" />
-              </div>
-              <div className="ml-3 hidden sm:block">
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                  Water Supply
-                </span>
-                <p className="text-xs text-gray-500">Management System</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-2 items-center">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "inline-flex items-center px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200",
-                    isActive
-                      ? "bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg scale-105"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:scale-105"
-                  )}
-                >
-                  <Icon className="h-5 w-5 mr-2" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+    <DataProvider>
+      <div className="min-h-screen bg-background">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white border-b sticky top-0 z-50">
+          <div className="flex items-center justify-between p-4">
+            <h2>Water Irrigation Supply</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden pb-4 animate-fade-in">
-            <div className="space-y-2">
-              {navItems.map((item) => {
+        <div className="flex">
+          {/* Sidebar */}
+          <aside
+            className={`
+              fixed lg:sticky top-0 h-screen bg-white border-r
+              w-64 z-40 transition-transform duration-200
+              ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}
+          >
+            <div className="p-6 border-b hidden lg:block">
+              <h2>Water Irrigation Supply</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Management System
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {user.fullName}
+              </p>
+            </div>
+
+            <nav className="p-4 space-y-2">
+              {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = currentPage === item.id;
+                
                 return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200",
-                      isActive
-                        ? "bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg"
-                        : "text-gray-600 hover:bg-gray-100"
-                    )}
+                  <button
+                    key={item.id}
+                    onClick={() => navigateTo(item.id)}
+                    className={`
+                      w-full flex items-center gap-3 px-4 py-3 rounded-lg
+                      transition-colors
+                      ${isActive 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                      }
+                    `}
                   >
-                    <Icon className="h-5 w-5 mr-3" />
+                    <Icon className="h-5 w-5" />
                     <span>{item.label}</span>
-                  </Link>
+                  </button>
                 );
               })}
+            </nav>
+
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-muted/50">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={logout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Version 2.0.0
+              </p>
             </div>
-          </div>
-        )}
+          </aside>
+
+          {/* Overlay for mobile */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+
+          {/* Main Content */}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              {currentPage === 'dashboard' && (
+                <Dashboard
+                  onNewSupply={() => navigateTo('new-supply')}
+                  onViewFarmers={() => navigateTo('farmers')}
+                />
+              )}
+
+              {currentPage === 'new-supply' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h1>Water Supply Entry</h1>
+                      <p className="text-muted-foreground">
+                        Record a new water supply session
+                      </p>
+                    </div>
+                  </div>
+                  <SupplyEntryForm onSuccess={() => navigateTo('dashboard')} />
+                </div>
+              )}
+
+              {currentPage === 'farmers' && (
+                <FarmerManagement
+                  onViewProfile={(id) => navigateTo('farmer-profile', id)}
+                />
+              )}
+
+              {currentPage === 'farmer-profile' && selectedFarmerId && (
+                <FarmerProfile
+                  farmerId={selectedFarmerId}
+                  onBack={() => navigateTo('farmers')}
+                />
+              )}
+
+              {currentPage === 'reports' && <Reports />}
+
+              {currentPage === 'settings' && <Settings />}
+            </div>
+          </main>
+        </div>
+
+        <Toaster />
       </div>
-    </nav>
+    </DataProvider>
+  );
+}
+
+function HandlerRoutes() {
+  const location = useLocation();
+  return (
+    <StackHandler app={stackClientApp} location={location.pathname} fullPage />
   );
 }
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/supply" element={<SupplyEntryForm />} />
-            <Route path="/farmers" element={<FarmerManagement />} />
-            <Route path="/farmers/:id" element={<FarmerProfile />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </main>
-        <Toaster />
-      </div>
-    </Router>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center">
+      <Droplets className="h-12 w-12 text-primary animate-pulse" />
+    </div>}>
+      <BrowserRouter>
+        <StackProvider app={stackClientApp}>
+          <StackTheme>
+            <AuthProvider>
+              <Routes>
+                <Route path="/handler/*" element={<HandlerRoutes />} />
+                <Route path="/*" element={<MainApp />} />
+              </Routes>
+            </AuthProvider>
+          </StackTheme>
+        </StackProvider>
+      </BrowserRouter>
+    </Suspense>
   );
 }
 

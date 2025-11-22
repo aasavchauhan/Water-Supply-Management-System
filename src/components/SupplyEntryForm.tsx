@@ -1,219 +1,262 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useData } from '@/context/DataContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useData } from '../context/DataContext';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
-import { SupplyFormData } from '@/types';
-import { convertMeterToHours, calculateTimeDuration, validateMeterReading, getTodayDate } from '@/utils/calculations';
-import { Droplets, Calculator, Clock, Gauge } from 'lucide-react';
+import { Clock, Gauge, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from './ui/alert';
 
-export default function SupplyEntryForm() {
+interface SupplyEntryFormProps {
+  onSuccess: () => void;
+}
+
+type BillingMethod = 'meter' | 'time';
+
+export function SupplyEntryForm({ onSuccess }: SupplyEntryFormProps) {
   const { farmers, addSupplyEntry, settings } = useData();
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState<SupplyFormData>({
+  
+  const [billingMethod, setBillingMethod] = useState<BillingMethod>('meter');
+  const [formData, setFormData] = useState({
     farmerId: '',
-    date: getTodayDate(),
-    billingMethod: 'meter',
-    meterReadingStart: '',
-    meterReadingEnd: '',
+    date: new Date().toISOString().split('T')[0],
     startTime: '',
     stopTime: '',
-    pauseDuration: '0',
-    rate: settings.defaultRate.toString(),
+    pauseDuration: 0,
+    meterReadingStart: '',
+    meterReadingEnd: '',
+    rate: settings?.defaultHourlyRate || 100,
     remarks: '',
   });
 
-  // Auto-calculate total time and amount
+  /**
+   * Converts meter reading in h.mm format to decimal hours
+   * @param reading - Meter reading (e.g., "5.30" for 5 hours 30 minutes)
+   * @returns Hours in decimal format (e.g., 5.5)
+   */
+  const convertMeterToHours = (reading: string): number => {
+    if (!reading) return 0;
+    const value = parseFloat(reading);
+    if (isNaN(value)) return 0;
+    
+    const hours = Math.floor(value);
+    const minutes = Math.round((value - hours) * 100);
+    return hours + (minutes / 60);
+  };
+
+  /**
+   * Validates meter reading format (minutes must be 0-59)
+   */
+  const validateMeterReading = (reading: string): boolean => {
+    if (!reading) return true; // Empty is valid (will be 0)
+    const value = parseFloat(reading);
+    if (isNaN(value) || value < 0) return false;
+    
+    const minutes = Math.round((value - Math.floor(value)) * 100);
+    return minutes <= 59;
+  };
+
+  // Auto-calculate totals when relevant fields change
   const calculated = useMemo(() => {
     let totalTimeUsed = 0;
+    let totalWaterUsed = 0;
 
-    if (formData.billingMethod === 'meter' && formData.meterReadingStart && formData.meterReadingEnd) {
-      const start = parseFloat(formData.meterReadingStart);
-      const end = parseFloat(formData.meterReadingEnd);
-      if (!isNaN(start) && !isNaN(end) && end > start) {
-        const startHours = convertMeterToHours(start);
-        const endHours = convertMeterToHours(end);
-        totalTimeUsed = endHours - startHours;
+    if (billingMethod === 'meter') {
+      // Meter-based calculation
+      if (formData.meterReadingStart && formData.meterReadingEnd) {
+        const startHours = convertMeterToHours(formData.meterReadingStart);
+        const endHours = convertMeterToHours(formData.meterReadingEnd);
+        totalTimeUsed = Math.max(0, endHours - startHours);
       }
-    } else if (formData.billingMethod === 'time' && formData.startTime && formData.stopTime) {
-      const pause = parseFloat(formData.pauseDuration) || 0;
-      totalTimeUsed = calculateTimeDuration(formData.startTime, formData.stopTime, pause);
+    } else {
+      // Time-based calculation
+      if (formData.startTime && formData.stopTime) {
+        const start = new Date(`1970-01-01T${formData.startTime}:00`);
+        let stop = new Date(`1970-01-01T${formData.stopTime}:00`);
+        
+        // Handle overnight shifts
+        if (stop < start) {
+          stop = new Date(`1970-01-02T${formData.stopTime}:00`);
+        }
+        
+        const diffMs = stop.getTime() - start.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
+        totalTimeUsed = Math.max(0, diffHours - formData.pauseDuration);
+      }
     }
-
-    const rate = parseFloat(formData.rate) || 0;
-    const amount = totalTimeUsed * rate;
-    const waterUsed = totalTimeUsed * (settings.waterFlowRate || 1000);
-
-    return { totalTimeUsed, amount, waterUsed };
-  }, [formData, settings.waterFlowRate]);
+    
+    // Calculate water based on time (assuming 1000 L/hour flow rate)
+    totalWaterUsed = totalTimeUsed * 1000;
+    
+    return {
+      totalTimeUsed: parseFloat(totalTimeUsed.toFixed(2)),
+      totalWaterUsed: parseFloat(totalWaterUsed.toFixed(2)),
+      amount: parseFloat((totalTimeUsed * formData.rate).toFixed(2))
+    };
+  }, [billingMethod, formData, convertMeterToHours]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     // Validation
     if (!formData.farmerId) {
       toast.error('Please select a farmer');
       return;
     }
 
-    if (formData.billingMethod === 'meter') {
-      const start = parseFloat(formData.meterReadingStart);
-      const end = parseFloat(formData.meterReadingEnd);
-      
+    if (billingMethod === 'meter') {
       if (!formData.meterReadingStart || !formData.meterReadingEnd) {
         toast.error('Please enter both meter readings');
         return;
       }
 
-      if (!validateMeterReading(start) || !validateMeterReading(end)) {
-        toast.error('Invalid meter reading format. Minutes must be 00-59');
+      if (!validateMeterReading(formData.meterReadingStart) || !validateMeterReading(formData.meterReadingEnd)) {
+        toast.error('Invalid meter reading format. Minutes must be 00-59 (e.g., 5.30 for 5h 30m)');
         return;
       }
 
-      if (end <= start) {
+      const startHours = convertMeterToHours(formData.meterReadingStart);
+      const endHours = convertMeterToHours(formData.meterReadingEnd);
+      
+      if (endHours <= startHours) {
         toast.error('End reading must be greater than start reading');
         return;
       }
     } else {
       if (!formData.startTime || !formData.stopTime) {
-        toast.error('Please enter both start and stop times');
+        toast.error('Please enter start and stop times');
         return;
       }
     }
 
     if (calculated.totalTimeUsed <= 0) {
-      toast.error('Total time must be greater than 0');
+      toast.error('Total time used must be greater than 0');
       return;
     }
 
-    if (parseFloat(formData.rate) <= 0) {
+    if (formData.rate <= 0) {
       toast.error('Rate must be greater than 0');
       return;
     }
 
-    // Create supply entry
+    // Submit the supply entry
     addSupplyEntry({
       farmerId: formData.farmerId,
       date: formData.date,
-      billingMethod: formData.billingMethod,
-      meterReadingStart: formData.billingMethod === 'meter' ? parseFloat(formData.meterReadingStart) : undefined,
-      meterReadingEnd: formData.billingMethod === 'meter' ? parseFloat(formData.meterReadingEnd) : undefined,
-      startTime: formData.billingMethod === 'time' ? formData.startTime : undefined,
-      stopTime: formData.billingMethod === 'time' ? formData.stopTime : undefined,
-      pauseDuration: formData.billingMethod === 'time' ? parseFloat(formData.pauseDuration) : undefined,
+      billingMethod,
+      startTime: formData.startTime || undefined,
+      stopTime: formData.stopTime || undefined,
+      pauseDuration: billingMethod === 'time' ? formData.pauseDuration : 0,
+      meterReadingStart: billingMethod === 'meter' ? parseFloat(formData.meterReadingStart) : 0,
+      meterReadingEnd: billingMethod === 'meter' ? parseFloat(formData.meterReadingEnd) : 0,
+      totalWaterUsed: calculated.totalWaterUsed,
       totalTimeUsed: calculated.totalTimeUsed,
-      waterUsed: calculated.waterUsed,
-      rate: parseFloat(formData.rate),
+      rate: formData.rate,
       amount: calculated.amount,
-      remarks: formData.remarks || undefined,
+      remarks: formData.remarks,
     });
 
-    toast.success('Supply entry added successfully');
-    navigate('/');
+    toast.success('Supply entry saved successfully');
+    onSuccess();
   };
 
-  const selectedFarmer = farmers.find(f => f.id === formData.farmerId);
-
-  // Auto-fill rate when farmer is selected
-  const handleFarmerChange = (farmerId: string) => {
-    const farmer = farmers.find(f => f.id === farmerId);
-    setFormData(prev => ({
-      ...prev,
-      farmerId,
-      rate: farmer ? farmer.defaultRate.toString() : settings.defaultRate.toString(),
-    }));
-  };
+  const activeFarmers = farmers.filter(f => f.isActive !== false);
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 animate-fade-in">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-3 bg-gradient-primary rounded-xl shadow-lg">
-            <Droplets className="h-8 w-8 text-white" />
+    <Card className="max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle>New Water Supply Session</CardTitle>
+        <CardDescription>Record a new water supply entry for a farmer</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section A: Farmer Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="farmer">Farmer Name / Mobile <span className="text-destructive">*</span></Label>
+            <Select
+              value={formData.farmerId}
+              onValueChange={(value) => {
+                const farmer = farmers.find(f => f.id === value);
+                setFormData({ 
+                  ...formData, 
+                  farmerId: value,
+                  rate: farmer?.defaultRate || settings?.defaultHourlyRate || 100
+                });
+              }}
+            >
+              <SelectTrigger id="farmer">
+                <SelectValue placeholder="Select a farmer" />
+              </SelectTrigger>
+              <SelectContent>
+                {activeFarmers.length === 0 ? (
+                  <SelectItem value="none" disabled>No active farmers found</SelectItem>
+                ) : (
+                  activeFarmers.map((farmer) => (
+                    <SelectItem key={farmer.id} value={farmer.id}>
+                      {farmer.name} • {farmer.mobile}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">New Supply Entry</h1>
-            <p className="text-gray-500 mt-1">Record a new water supply session</p>
+
+          {/* Section B: Date Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="date">Date <span className="text-destructive">*</span></Label>
+            <Input
+              id="date"
+              type="date"
+              value={formData.date}
+              max={new Date().toISOString().split('T')[0]}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              required
+            />
           </div>
-        </div>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Form */}
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit}>
-            <Card className="shadow-xl animate-slide-up border-2">
-              <CardHeader className="bg-gradient-to-r from-blue-50 via-purple-50 to-transparent border-b-2">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Calculator className="h-6 w-6 text-blue-600" />
-                  Supply Details
-                </CardTitle>
-                <CardDescription>Fill in the water supply information</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6 pt-6">
-            {/* Farmer Selection */}
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="farmer">Farmer *</Label>
-                <Select value={formData.farmerId} onValueChange={handleFarmerChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select farmer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {farmers.map(farmer => (
-                      <SelectItem key={farmer.id} value={farmer.id}>
-                        {farmer.name} - {farmer.mobile}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="date">Date *</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  required
-                />
-              </div>
+          {/* Section C: Billing Method Toggle */}
+          <div className="space-y-3">
+            <Label>Billing Method <span className="text-destructive">*</span></Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={billingMethod === 'meter' ? 'default' : 'outline'}
+                className="flex-1"
+                onClick={() => setBillingMethod('meter')}
+              >
+                <Gauge className="mr-2 h-4 w-4" />
+                Meter Reading
+              </Button>
+              <Button
+                type="button"
+                variant={billingMethod === 'time' ? 'default' : 'outline'}
+                className="flex-1"
+                onClick={() => setBillingMethod('time')}
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                Time-Based
+              </Button>
             </div>
+          </div>
 
-            {/* Billing Method */}
-            <div className="space-y-2">
-              <Label>Billing Method *</Label>
-              <div className="flex gap-4">
-                <Button
-                  type="button"
-                  variant={formData.billingMethod === 'meter' ? 'default' : 'outline'}
-                  onClick={() => setFormData({ ...formData, billingMethod: 'meter' })}
-                >
-                  Meter Reading
-                </Button>
-                <Button
-                  type="button"
-                  variant={formData.billingMethod === 'time' ? 'default' : 'outline'}
-                  onClick={() => setFormData({ ...formData, billingMethod: 'time' })}
-                >
-                  Time-Based
-                </Button>
-              </div>
-            </div>
-
-            {/* Meter-Based Fields */}
-            {formData.billingMethod === 'meter' && (
+          {/* Section D: Meter-Based Billing Fields */}
+          {billingMethod === 'meter' && (
+            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Enter meter readings in h.mm format (e.g., 5.30 = 5 hours 30 minutes)
+                </AlertDescription>
+              </Alert>
+              
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="meterStart">Meter Reading Start (h.mm) *</Label>
+                  <Label htmlFor="meterStart">
+                    Meter Reading Start <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="meterStart"
                     type="number"
@@ -221,11 +264,19 @@ export default function SupplyEntryForm() {
                     placeholder="e.g., 5.30 (5h 30m)"
                     value={formData.meterReadingStart}
                     onChange={(e) => setFormData({ ...formData, meterReadingStart: e.target.value })}
+                    required={billingMethod === 'meter'}
                   />
+                  {formData.meterReadingStart && (
+                    <p className="text-xs text-muted-foreground">
+                      = {convertMeterToHours(formData.meterReadingStart).toFixed(2)} hours
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="meterEnd">Meter Reading End (h.mm) *</Label>
+                  <Label htmlFor="meterEnd">
+                    Meter Reading End <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="meterEnd"
                     type="number"
@@ -233,187 +284,169 @@ export default function SupplyEntryForm() {
                     placeholder="e.g., 10.45 (10h 45m)"
                     value={formData.meterReadingEnd}
                     onChange={(e) => setFormData({ ...formData, meterReadingEnd: e.target.value })}
+                    required={billingMethod === 'meter'}
                   />
+                  {formData.meterReadingEnd && (
+                    <p className="text-xs text-muted-foreground">
+                      = {convertMeterToHours(formData.meterReadingEnd).toFixed(2)} hours
+                    </p>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Time-Based Fields */}
-            {formData.billingMethod === 'time' && (
-              <div className="grid gap-4 md:grid-cols-3">
+          {/* Section E: Time-Based Billing Fields */}
+          {billingMethod === 'time' && (
+            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="startTime">Start Time *</Label>
+                  <Label htmlFor="startTime">
+                    Start Time <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="startTime"
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    required={billingMethod === 'time'}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="stopTime">Stop Time *</Label>
+                  <Label htmlFor="stopTime">
+                    Stop Time <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="stopTime"
                     type="time"
                     value={formData.stopTime}
                     onChange={(e) => setFormData({ ...formData, stopTime: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pause">Pause Duration (hours)</Label>
-                  <Input
-                    id="pause"
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    placeholder="0"
-                    value={formData.pauseDuration}
-                    onChange={(e) => setFormData({ ...formData, pauseDuration: e.target.value })}
+                    required={billingMethod === 'time'}
                   />
                 </div>
               </div>
-            )}
 
-            {/* Rate and Amount */}
-            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="rate">Rate (₹/hour) *</Label>
+                <Label htmlFor="pauseDuration">Pause Duration (hours)</Label>
                 <Input
-                  id="rate"
+                  id="pauseDuration"
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.rate}
-                  onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
-                  required
+                  placeholder="0.00"
+                  value={formData.pauseDuration}
+                  onChange={(e) => setFormData({ ...formData, pauseDuration: parseFloat(e.target.value) || 0 })}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Time when supply was paused/stopped (optional)
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <Label>Amount (₹)</Label>
-                <Input
-                  value={calculated.amount.toFixed(2)}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-            </div>
-
-            {/* Remarks */}
-            <div className="space-y-2">
-              <Label htmlFor="remarks">Remarks</Label>
-              <Textarea
-                id="remarks"
-                placeholder="Optional notes..."
-                value={formData.remarks}
-                onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-                rows={3}
-              />
-            </div>
-
-            {/* Summary Panel */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
-              <h3 className="font-semibold mb-3">Session Summary</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600">Method</p>
-                  <p className="font-semibold">{formData.billingMethod === 'meter' ? 'Meter' : 'Time'}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Total Hours</p>
-                  <p className="font-semibold">{calculated.totalTimeUsed.toFixed(2)} h</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Water Used</p>
-                  <p className="font-semibold">{calculated.waterUsed.toFixed(0)} L</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Amount</p>
-                  <p className="font-semibold text-primary text-lg">₹{calculated.amount.toFixed(2)}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-4">
-              <Button type="submit" className="flex-1">
-                Submit Supply Entry
-              </Button>
-              <Button type="button" variant="outline" onClick={() => navigate('/')}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </form>
-    </div>
-
-    {/* Live Preview Panel */}
-    <div className="lg:col-span-1">
-      <Card className="shadow-xl sticky top-6 border-2 animate-scale-in">
-        <CardHeader className="bg-gradient-to-br from-green-50 to-transparent border-b-2">
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-green-600" />
-            Live Preview
-          </CardTitle>
-          <CardDescription>Real-time calculations</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-6">
-          {/* Selected Farmer */}
-          {selectedFarmer && (
-            <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-              <p className="text-xs text-gray-600 mb-1">Farmer</p>
-              <p className="font-bold text-lg">{selectedFarmer.name}</p>
-              <p className="text-sm text-gray-600">{selectedFarmer.mobile}</p>
             </div>
           )}
 
-          {/* Billing Method */}
-          <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-            <p className="text-xs text-gray-600 mb-1">Billing Method</p>
-            <div className="flex items-center gap-2">
-              <Gauge className="h-5 w-5 text-purple-600" />
-              <p className="font-bold">
-                {formData.billingMethod === 'meter' ? 'Meter Reading' : 'Time-Based'}
-              </p>
+          {/* Section F: Billing Details */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="rate">
+                Rate (₹/hour) <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="rate"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.rate}
+                onChange={(e) => setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Amount (₹)</Label>
+              <Input
+                value={`₹${calculated.amount.toFixed(2)}`}
+                disabled
+                className="bg-muted font-semibold"
+              />
             </div>
           </div>
 
-          {/* Calculations */}
-          <div className="space-y-3">
-            <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-2 border-orange-200">
-              <p className="text-xs text-gray-600 mb-1">Total Hours</p>
-              <p className="font-bold text-2xl text-orange-700">
-                {calculated.totalTimeUsed.toFixed(2)} <span className="text-sm">hrs</span>
-              </p>
-            </div>
+          {/* Section G: Additional Information */}
+          <div className="space-y-2">
+            <Label htmlFor="remarks">Remarks / Notes</Label>
+            <Textarea
+              id="remarks"
+              value={formData.remarks}
+              onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+              placeholder="Optional notes about this supply session"
+              rows={3}
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {formData.remarks.length} / 500 characters
+            </p>
+          </div>
 
-            <div className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg border-2 border-cyan-200">
-              <p className="text-xs text-gray-600 mb-1">Water Used</p>
-              <p className="font-bold text-2xl text-cyan-700">
-                {calculated.waterUsed.toFixed(0)} <span className="text-sm">L</span>
-              </p>
-            </div>
-
-            <div className="p-4 bg-gradient-primary rounded-lg shadow-lg">
-              <p className="text-xs text-white/80 mb-1">Total Amount</p>
-              <p className="font-bold text-3xl text-white">
-                ₹{calculated.amount.toFixed(2)}
-              </p>
+          {/* Section H: Session Summary Panel */}
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 p-6 rounded-lg">
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <Gauge className="h-5 w-5" />
+              Session Summary
+            </h3>
+            <div className="grid gap-3">
+              <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                <span className="text-muted-foreground">Billing Method:</span>
+                <span className="font-medium capitalize">{billingMethod === 'meter' ? 'Meter Reading' : 'Time-Based'}</span>
+              </div>
+              
+              {billingMethod === 'meter' && formData.meterReadingStart && formData.meterReadingEnd && (
+                <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                  <span className="text-muted-foreground">Meter Range:</span>
+                  <span className="font-medium">
+                    {formData.meterReadingStart} → {formData.meterReadingEnd}
+                  </span>
+                </div>
+              )}
+              
+              {billingMethod === 'time' && formData.startTime && formData.stopTime && (
+                <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                  <span className="text-muted-foreground">Time Range:</span>
+                  <span className="font-medium">
+                    {formData.startTime} → {formData.stopTime}
+                    {formData.pauseDuration > 0 && ` (pause: ${formData.pauseDuration}h)`}
+                  </span>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                <span className="text-muted-foreground">Total Time:</span>
+                <span className="font-medium">{calculated.totalTimeUsed.toFixed(2)} hours</span>
+              </div>
+              
+              <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                <span className="text-muted-foreground">Rate per Hour:</span>
+                <span className="font-medium">₹{formData.rate.toFixed(2)}</span>
+              </div>
+              
+              <div className="flex justify-between items-center pt-3 mt-2 border-t-2 border-primary/30">
+                <span className="text-lg font-semibold">Total Amount:</span>
+                <span className="text-2xl font-bold text-primary">₹{calculated.amount.toFixed(2)}</span>
+              </div>
             </div>
           </div>
 
-          {/* Rate Info */}
-          <div className="p-3 bg-gray-100 rounded-lg text-sm">
-            <p className="text-gray-600">Rate: <span className="font-semibold">₹{formData.rate}/hour</span></p>
-            <p className="text-gray-600 mt-1">Date: <span className="font-semibold">{formData.date || 'Not set'}</span></p>
+          {/* Submit Buttons */}
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" size="lg" className="flex-1">
+              Save Supply Entry
+            </Button>
+            <Button type="button" size="lg" variant="outline" onClick={onSuccess}>
+              Cancel
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  </div>
-</div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
