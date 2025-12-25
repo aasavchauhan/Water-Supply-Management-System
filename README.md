@@ -1,12 +1,18 @@
 # Water Supply Management - Native Android App
 
 ![Build Status](https://github.com/aasavchauhan/WaterSupplyManagement/actions/workflows/build_release.yml/badge.svg)
+![Latest Release](https://img.shields.io/github/v/release/aasavchauhan/WaterSupplyManagement?label=Latest%20Version&style=flat-square&color=blue)
+![License](https://img.shields.io/github/license/aasavchauhan/WaterSupplyManagement?style=flat-square)
 
 A native Android application for managing water supply distribution to farmers with offline-first architecture.
 
+<div align="center">
+  <h3>📲 <a href="https://github.com/aasavchauhan/WaterSupplyManagement/releases/latest">Download Latest APK</a></h3>
+</div>
+
 ## 📦 Automated Releases
 This repository features an automated CI/CD pipeline.
-Every time a tag (e.g., `v1.0`) is pushed, a new **APK** is automatically built and attached to the [Releases Page](https://github.com/aasavchauhan/WaterSupplyManagement/releases).
+Every time a tag (e.g., `v1.0`) is pushed, a new **APK** is automatically built and attached to the Release.
 
 
 ## 🎯 Features
