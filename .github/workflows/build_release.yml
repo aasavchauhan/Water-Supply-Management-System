@@ -30,14 +30,21 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then
-            echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+            echo "Secret found. Decoding..."
+            # Clean newlines and decode
+            echo "$GOOGLE_SERVICES_JSON" | tr -d '\n\r' | base64 --decode > app/google-services.json
+            echo "google-services.json created from secret."
           else
             echo "Warning: GOOGLE_SERVICES_JSON secret not found. Using dummy file."
             echo '{"project_info":{"project_number":"000000000000","project_id":"dummy","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000000000000:android:0000000000000000","android_client_info":{"package_name":"com.watersupply"}},"api_key":[{"current_key":"dummy"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}]}' > app/google-services.json
+            echo "dummy google-services.json created."
           fi
 
+      - name: Verify google-services.json
+        run: ls -l app/google-services.json
+
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace --info
         # Note: In a real production scenario, you would use 'assembleRelease' and set up signing keys.
         # For this template, we build the Debug version which is installable.
 
