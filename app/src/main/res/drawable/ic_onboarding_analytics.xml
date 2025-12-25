@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#F3E5F5"
+        android:pathData="M100,100m-90,0a90,90 0,1,1 180,0a90,90 0,1,1 -180,0"/>
+    
+    <!-- Chart Bar 1 -->
+    <path
+        android:fillColor="#7B1FA2"
+        android:pathData="M70,120h15v40h-15z"/>
+    
+    <!-- Chart Bar 2 -->
+    <path
+        android:fillColor="#9C27B0"
+        android:pathData="M92.5,100h15v60h-15z"/>
+    
+    <!-- Chart Bar 3 -->
+    <path
+        android:fillColor="#AB47BC"
+        android:pathData="M115,80h15v80h-15z"/>
+    
+    <!-- Upward Arrow -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M145,70 L145,100 L135,90 L145,70 L155,90z"/>
+</vector>

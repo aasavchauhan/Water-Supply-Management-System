@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Supply Report V2 - Modern Minimal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 40px;
+            background-color: #f0f2f5;
+        }
+
+        .report-page {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border-top: 8px solid #000;
+            min-height: 1100px;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        .brand-name {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #000;
+            margin-bottom: 40px;
+        }
+
+        .title-block h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .title-block p {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .grid-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 30px;
+        }
+
+        .info-group label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .info-group .value {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .big-number-block {
+            background-color: #000;
+            color: white;
+            padding: 30px;
+            border-radius: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .big-number-label {
+            font-size: 14px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .big-number-value {
+            font-size: 42px;
+            font-weight: 800;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 0;
+            border-bottom: 2px solid #000;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #666;
+        }
+
+        td {
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .meta-col {
+            width: 30%;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .desc-col {
+            width: 40%;
+            font-weight: 600;
+        }
+
+        .amt-col {
+            width: 30%;
+            text-align: right;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .positive {
+            color: #000;
+        }
+
+        .negative {
+            color: #2e7d32;
+        }
+
+        /* Payment is green in UI, but credit here */
+
+        .footer {
+            margin-top: 80px;
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="report-page">
+        <div class="header">
+            <div class="brand-name">Water Supply Management</div>
+            <div class="title-block">
+                <h1>Statement of<br>Account</h1>
+                <p>Dec 2025</p>
+            </div>
+        </div>
+
+        <div class="grid-info">
+            <div class="info-group">
+                <label>Bill To</label>
+                <div class="value">Ramesh Kumar</div>
+                <div style="font-size: 14px; color: #666; margin-top: 4px;">FARM-001</div>
+            </div>
+            <div class="info-group" style="text-align: right;">
+                <label>Date Issued</label>
+                <div class="value">25 Dec 2025</div>
+            </div>
+        </div>
+
+        <div class="big-number-block">
+            <div class="big-number-label">Total Amount Due</div>
+            <div class="big-number-value">₹1,550.00</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="meta-col">20 Dec 2025</td>
+                    <td class="desc-col">Water Supply (5 Hrs)</td>
+                    <td class="amt-col positive">₹500.00</td>
+                </tr>
+                <tr>
+                    <td class="meta-col">18 Dec 2025</td>
+                    <td class="desc-col">Water Supply (4.5 Hrs)</td>
+                    <td class="amt-col positive">₹450.00</td>
+                </tr>
+                <tr>
+                    <td class="meta-col">15 Dec 2025</td>
+                    <td class="desc-col">Payment Received (Cash)</td>
+                    <td class="amt-col negative">- ₹2,000.00</td>
+                </tr>
+                <tr>
+                    <td class="meta-col">10 Dec 2025</td>
+                    <td class="desc-col">Water Supply (6 Hrs)</td>
+                    <td class="amt-col positive">₹600.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <span>Generated by Aasav Chauhan</span>
+            <span>Page 1 of 1</span>
+        </div>
+    </div>
+
+</body>
+
+</html>

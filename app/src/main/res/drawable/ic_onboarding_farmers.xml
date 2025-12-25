@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#E0F2F1"
+        android:pathData="M100,100m-90,0a90,90 0,1,1 180,0a90,90 0,1,1 -180,0"/>
+    
+    <!-- Person Icon -->
+    <path
+        android:fillColor="#00796B"
+        android:pathData="M100,60m-20,0a20,20 0,1,1 40,0a20,20 0,1,1 -40,0"/>
+    <path
+        android:fillColor="#00796B"
+        android:pathData="M100,90c-16.5,0 -30,13.5 -30,30v25h60v-25c0,-16.5 -13.5,-30 -30,-30z"/>
+    
+    <!-- Plus Icon -->
+    <path
+        android:fillColor="#26A69A"
+        android:pathData="M135,115a20,20 0,1,1 0,40a20,20 0,1,1 0,-40z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M135,125 L135,145 M125,135 L145,135"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"/>
+</vector>

@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/neutral_100">
+    
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        android:background="@color/neutral_100">
+        
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/new_supply"
+            app:navigationIcon="@drawable/ic_back"
+            app:titleTextAppearance="?attr/textAppearanceTitleLarge"
+            app:titleTextColor="@color/neutral_900"
+            android:background="@color/neutral_100" />
+    </com.google.android.material.appbar.AppBarLayout>
+    
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            
+            <!-- Farmer Selection Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/farmerSelectionCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/white"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilFarmerSearch"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Select Farmer">
+                        
+                        <AutoCompleteTextView
+                            android:id="@+id/actvFarmerSearch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Farmer Name Display Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/farmerNameCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/brand_primary"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/card_corner_radius">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/farmerAvatar"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_person"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                        android:layout_marginEnd="@dimen/spacing_md"
+                        app:tint="@color/white"
+                        android:background="@drawable/bg_circle_light_blue"
+                        android:padding="8dp" />
+                    
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Recording entry for"
+                            android:textSize="@dimen/text_size_caption"
+                            android:textColor="@color/white"
+                            android:alpha="0.9"
+                            android:layout_marginBottom="@dimen/spacing_xxs" />
+                        
+                        <TextView
+                            android:id="@+id/tvFarmerName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Farmer Name"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/white" />
+                        
+                        <TextView
+                            android:id="@+id/tvFarmerBalance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Balance: ₹0.00"
+                            android:textSize="@dimen/text_size_caption"
+                            android:textColor="@color/white"
+                            android:alpha="0.9"
+                            android:layout_marginTop="@dimen/spacing_xxs" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Date Selection Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_sm">
+                        
+                        <ImageView
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@color/brand_primary"
+                            android:contentDescription="@string/content_desc_calendar"
+                            android:layout_marginEnd="@dimen/spacing_sm"
+                            android:background="@drawable/bg_circle_light_blue"
+                            android:padding="6dp" />
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Date"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900" />
+                    </LinearLayout>
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        
+                        <TextView
+                            android:id="@+id/tvSelectedDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Today"
+                            android:textSize="@dimen/text_size_body"
+                            android:textColor="@color/neutral_700"
+                            android:padding="@dimen/spacing_sm" />
+                        
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSelectDate"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Change"
+                            android:textColor="@color/brand_primary"
+                            app:strokeColor="@color/brand_primary"
+                            app:icon="@drawable/ic_calendar"
+                            app:iconTint="@color/brand_primary"
+                            app:iconSize="18dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Billing Method Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <ImageView
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
+                            android:src="@drawable/ic_water"
+                            app:tint="@color/brand_primary"
+                            android:contentDescription="@string/billing_method"
+                            android:layout_marginEnd="@dimen/spacing_sm"
+                            android:background="@drawable/bg_circle_light_blue"
+                            android:padding="6dp" />
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/billing_method"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900" />
+                    </LinearLayout>
+                    
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/billingMethodGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:checkedButton="@id/btnMeter">
+                        
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMeter"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_small"
+                            android:layout_weight="1"
+                            android:text="@string/meter_reading" />
+                        
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTime"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_small"
+                            android:layout_weight="1"
+                            android:text="@string/time_based" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Meter-Based Inputs Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/meterInputsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="visible"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilMeterStart"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/start_reading"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:startIconDrawable="@drawable/ic_timer"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:helperText="Initial meter reading"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etMeterStart"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilMeterEnd"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/end_reading"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:startIconDrawable="@drawable/ic_timer"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:helperText="Final meter reading"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etMeterEnd"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Rate per Hour"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:startIconDrawable="@drawable/ic_currency"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:prefixText="₹ "
+                        app:suffixText="/hour"
+                        app:helperText="Standard hourly billing rate"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etMeterRate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="100"
+                            android:textSize="@dimen/text_size_title"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    
+                    <!-- Calculation Display -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_md"
+                        app:cardBackgroundColor="@color/neutral_50"
+                        app:cardElevation="0dp"
+                        app:cardCornerRadius="@dimen/spacing_sm"
+                        app:strokeColor="@color/neutral_200"
+                        app:strokeWidth="1dp">
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_md">
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/calculated_amount"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textColor="@color/neutral_500"
+                                android:textAllCaps="true"
+                                android:layout_marginBottom="@dimen/spacing_xs" />
+                            
+                            <TextView
+                                android:id="@+id/tvMeterCalculatedHours"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00 hours"
+                                android:textSize="@dimen/text_size_body"
+                                android:textColor="@color/neutral_700"
+                                android:layout_marginBottom="@dimen/spacing_xxs" />
+                            
+                            <TextView
+                                android:id="@+id/tvMeterCalculatedAmount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0.00"
+                                android:textSize="@dimen/text_size_display"
+                                android:textStyle="bold"
+                                android:textColor="@color/brand_primary" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/remarks"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:helperText="Optional notes about this entry">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etMeterRemarks"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textMultiLine"
+                            android:minLines="2"
+                            android:gravity="top|start"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Time-Based Inputs Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/timeInputsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="gone"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <ImageView
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
+                            android:src="@drawable/ic_timer"
+                            app:tint="@color/brand_primary"
+                            android:contentDescription="@string/time_based"
+                            android:layout_marginEnd="@dimen/spacing_sm"
+                            android:background="@drawable/bg_circle_light_blue"
+                            android:padding="6dp" />
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Time Duration"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900" />
+                    </LinearLayout>
+                    
+                    <!-- Start Time -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/start_time"
+                        android:textSize="@dimen/text_size_caption"
+                        android:textColor="@color/neutral_500"
+                        android:textAllCaps="true"
+                        android:layout_marginBottom="@dimen/spacing_xxs" />
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <TextView
+                            android:id="@+id/tvStartTime"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="--:--"
+                            android:textSize="@dimen/text_size_title"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900"
+                            android:padding="@dimen/spacing_sm"
+                            android:background="@drawable/bg_rounded_border" />
+                        
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnStartTime"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_sm"
+                            android:text="Select"
+                            android:textColor="@color/brand_primary"
+                            app:strokeColor="@color/brand_primary"
+                            app:icon="@drawable/ic_timer"
+                            app:iconTint="@color/brand_primary"
+                            app:iconSize="18dp" />
+                    </LinearLayout>
+                    
+                    <!-- Stop Time -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stop_time"
+                        android:textSize="@dimen/text_size_caption"
+                        android:textColor="@color/neutral_500"
+                        android:textAllCaps="true"
+                        android:layout_marginBottom="@dimen/spacing_xxs" />
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <TextView
+                            android:id="@+id/tvStopTime"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="--:--"
+                            android:textSize="@dimen/text_size_title"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900"
+                            android:padding="@dimen/spacing_sm"
+                            android:background="@drawable/bg_rounded_border" />
+                        
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnStopTime"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_sm"
+                            android:text="Select"
+                            android:textColor="@color/brand_primary"
+                            app:strokeColor="@color/brand_primary"
+                            app:icon="@drawable/ic_timer"
+                            app:iconTint="@color/brand_primary"
+                            app:iconSize="18dp" />
+                    </LinearLayout>
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Pause Duration (hours)"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:startIconDrawable="@drawable/ic_timer"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:helperText="Total break time to subtract"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPauseDuration"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="0"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Rate per Hour"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:startIconDrawable="@drawable/ic_currency"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:prefixText="₹ "
+                        app:suffixText="/hour"
+                        app:helperText="Standard hourly billing rate"
+                        android:layout_marginBottom="@dimen/spacing_md">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTimeRate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:text="100"
+                            android:textSize="@dimen/text_size_title"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    
+                    <!-- Calculation Display -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/spacing_md"
+                        app:cardBackgroundColor="@color/neutral_50"
+                        app:cardElevation="0dp"
+                        app:cardCornerRadius="@dimen/spacing_sm"
+                        app:strokeColor="@color/neutral_200"
+                        app:strokeWidth="1dp">
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_md">
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/calculated_amount"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textColor="@color/neutral_500"
+                                android:textAllCaps="true"
+                                android:layout_marginBottom="@dimen/spacing_xs" />
+                            
+                            <TextView
+                                android:id="@+id/tvCalculatedHours"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00 hours"
+                                android:textSize="@dimen/text_size_body"
+                                android:textColor="@color/neutral_700"
+                                android:layout_marginBottom="@dimen/spacing_xxs" />
+                            
+                            <TextView
+                                android:id="@+id/tvCalculatedAmount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0.00"
+                                android:textSize="@dimen/text_size_display"
+                                android:textStyle="bold"
+                                android:textColor="@color/brand_primary" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                    
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/remarks"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:helperText="Optional notes about this entry">
+                        
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTimeRemarks"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textMultiLine"
+                            android:minLines="2"
+                            android:gravity="top|start"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Draft Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDraft"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="Save as Draft"
+                android:textSize="@dimen/text_size_body"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_edit"
+                app:iconGravity="textStart"
+                app:iconSize="20dp"
+                app:cornerRadius="@dimen/button_corner_radius"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:textColor="@color/brand_primary"
+                app:strokeColor="@color/brand_primary"
+                android:layout_marginTop="@dimen/spacing_md" />
+
+            <!-- Save Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/save"
+                android:textSize="@dimen/text_size_body"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_save"
+                app:iconGravity="textStart"
+                app:iconSize="20dp"
+                app:cornerRadius="@dimen/button_corner_radius"
+                app:backgroundTint="@null"
+                android:background="@drawable/bg_button_primary"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:layout_marginBottom="@dimen/spacing_lg" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

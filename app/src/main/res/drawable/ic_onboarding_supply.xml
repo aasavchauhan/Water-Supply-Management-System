@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M100,100m-90,0a90,90 0,1,1 180,0a90,90 0,1,1 -180,0"/>
+    
+    <!-- Water Drop -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M100,50c-15,0 -25,20 -25,35c0,13.8 11.2,25 25,25s25,-11.2 25,-25c0,-15 -10,-35 -25,-35z"/>
+    
+    <!-- Meter -->
+    <path
+        android:fillColor="#42A5F5"
+        android:strokeColor="#1565C0"
+        android:strokeWidth="2"
+        android:pathData="M70,120h60v40h-60z"/>
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M80,130h10v20h-10z M95,130h10v20h-10z M110,130h10v20h-10z"/>
+</vector>

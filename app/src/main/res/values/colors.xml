@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Premium Brand Colors -->
+    <color name="brand_primary">#2563EB</color> <!-- Premium Blue -->
+    <color name="brand_primary_dark">#1D4ED8</color>
+    <color name="brand_primary_light">#DBEAFE</color>
+    <color name="brand_secondary">#10B981</color> <!-- Emerald Green for success/money -->
+    <color name="brand_accent">#F59E0B</color> <!-- Amber for warnings -->
+    
+    <!-- Neutral Colors (Greyscale) -->
+    <color name="neutral_900">#111827</color> <!-- Main Text -->
+    <color name="neutral_700">#374151</color> <!-- Secondary Text -->
+    <color name="neutral_500">#6B7280</color> <!-- Tertiary Text / Icons -->
+    <color name="neutral_400">#9CA3AF</color>
+    <color name="neutral_300">#D1D5DB</color> <!-- Borders -->
+    <color name="neutral_200">#E5E7EB</color> <!-- Light Borders -->
+    <color name="neutral_100">#F3F4F6</color> <!-- Backgrounds -->
+    <color name="neutral_50">#F9FAFB</color>  <!-- Card Backgrounds -->
+    <color name="white">#FFFFFF</color>
+    
+    <!-- Semantic Colors -->
+    <color name="success">#10B981</color>
+    <color name="error">#EF4444</color>
+    <color name="error_50">#FEF2F2</color>
+    <color name="error_200">#FECACA</color>
+    <color name="error_700">#B91C1C</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">#3B82F6</color>
+
+    <!-- Theme Mapping (Light) -->
+    <color name="md_theme_light_primary">@color/brand_primary</color>
+    <color name="md_theme_light_onPrimary">@color/white</color>
+    <color name="md_theme_light_primaryContainer">@color/brand_primary_light</color>
+    <color name="md_theme_light_onPrimaryContainer">@color/brand_primary_dark</color>
+    
+    <color name="md_theme_light_secondary">@color/brand_secondary</color>
+    <color name="md_theme_light_onSecondary">@color/white</color>
+    <color name="md_theme_light_secondaryContainer">#D1FAE5</color>
+    <color name="md_theme_light_onSecondaryContainer">#065F46</color>
+    
+    <color name="md_theme_light_error">@color/error</color>
+    <color name="md_theme_light_onError">@color/white</color>
+    <color name="md_theme_light_errorContainer">#FEE2E2</color>
+    <color name="md_theme_light_onErrorContainer">#991B1B</color>
+    
+    <color name="md_theme_light_background">@color/neutral_100</color>
+    <color name="md_theme_light_onBackground">@color/neutral_900</color>
+    <color name="md_theme_light_surface">@color/white</color>
+    <color name="md_theme_light_onSurface">@color/neutral_900</color>
+    <color name="md_theme_light_surfaceVariant">@color/neutral_50</color>
+    <color name="md_theme_light_onSurfaceVariant">@color/neutral_700</color>
+    
+    <color name="md_theme_light_outline">@color/neutral_300</color>
+    <color name="md_theme_light_outlineVariant">@color/neutral_100</color>
+
+    <color name="md_theme_light_tertiary">@color/brand_accent</color>
+    <color name="md_theme_light_onTertiary">@color/white</color>
+    <color name="md_theme_light_tertiaryContainer">#FEF3C7</color>
+    <color name="md_theme_light_onTertiaryContainer">#B45309</color>
+
+    <color name="card_background_light">@color/white</color>
+    
+    <!-- Legacy/Compat Colors -->
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="info_blue">@color/info</color>
+    <color name="success_green">@color/success</color>
+    <color name="error_red">@color/error</color>
+    
+    <!-- Chart Colors -->
+    <color name="chart_purple">#8B5CF6</color>
+    <color name="chart_blue">#3B82F6</color>
+    <color name="chart_green">#10B981</color>
+    <color name="chart_orange">#F59E0B</color>
+    <color name="chart_red">#EF4444</color>
+    <color name="chart_cyan">#06B6D4</color>
+
+    <!-- Gradients & Shadows (Restored) -->
+    <color name="gradient_primary_start">@color/brand_primary</color>
+    <color name="gradient_primary_end">@color/brand_primary_dark</color>
+    
+    <color name="gradient_purple_start">#8B5CF6</color>
+    <color name="gradient_purple_end">#7C3AED</color>
+    
+    <color name="gradient_blue_start">#3B82F6</color>
+    <color name="gradient_blue_end">#2563EB</color>
+    
+    <color name="gradient_green_start">#10B981</color>
+    <color name="gradient_green_end">#059669</color>
+    
+    <color name="gradient_orange_start">#F59E0B</color>
+    <color name="gradient_orange_end">#D97706</color>
+    
+    <color name="shadow_light">#1A000000</color>
+
+    <!-- Badge Backgrounds (Restored) -->
+    <color name="badge_blue_bg">#DBEAFE</color>
+    <color name="badge_purple_bg">#EDE9FE</color>
+    <color name="badge_green_bg">#D1FAE5</color>
+    <color name="badge_orange_bg">#FEF3C7</color>
+
+    <!-- New Bottom Nav Colors (Light) -->
+    <color name="nav_bar_bg">#FFFFFF</color>
+    <color name="nav_item_active">@color/brand_primary</color>
+    <color name="nav_item_inactive">#484C52</color>
+    <color name="fab_bg">@color/brand_primary</color>
+</resources>

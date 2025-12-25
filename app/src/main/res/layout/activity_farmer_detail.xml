@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/neutral_50">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/neutral_50"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+            app:titleTextColor="@color/neutral_900" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="80dp">
+            
+            <!-- Farmer Profile Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/white">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:gravity="center_horizontal">
+                    
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivFarmerPhoto"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_person"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/bg_circle_light_blue"
+                        android:padding="16dp"
+                        app:tint="@color/brand_primary"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                        android:contentDescription="Farmer photo" />
+                    
+                    <TextView
+                        android:id="@+id/tvFarmerName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Farmer Name"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/neutral_900"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center" />
+                    
+                    <LinearLayout
+                        android:id="@+id/llPhoneContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground"
+                        android:padding="4dp">
+                        
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_phone"
+                            app:tint="@color/neutral_500"
+                            android:contentDescription="Phone" />
+                        
+                        <TextView
+                            android:id="@+id/tvFarmerMobile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mobile"
+                            android:textSize="14sp"
+                            android:textColor="@color/neutral_500"
+                            android:layout_marginStart="8dp" />
+                            
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="12dp"
+                            android:background="@color/neutral_300"
+                            android:layout_marginHorizontal="12dp" />
+                            
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_location"
+                            app:tint="@color/neutral_500"
+                            android:contentDescription="Location" />
+                            
+                        <TextView
+                            android:id="@+id/tvFarmerLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Location"
+                            android:textSize="14sp"
+                            android:textColor="@color/neutral_500"
+                            android:layout_marginStart="8dp" />
+                    </LinearLayout>
+                    
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/neutral_100"
+                        android:layout_marginVertical="24dp" />
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Default Rate"
+                                android:textSize="12sp"
+                                android:textColor="@color/neutral_500"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.05" />
+                            
+                            <TextView
+                                android:id="@+id/tvDefaultRate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹100/hr"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/neutral_900"
+                                android:layout_marginTop="4dp" />
+                        </LinearLayout>
+                        
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/neutral_100" />
+                        
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Current Balance"
+                                android:textSize="12sp"
+                                android:textColor="@color/neutral_500"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.05" />
+                            
+                            <TextView
+                                android:id="@+id/tvBalance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0.00"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/brand_primary"
+                                android:layout_marginTop="4dp" />
+                                
+                            <TextView
+                                android:id="@+id/tvBalanceWarning"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="High balance!"
+                                android:textSize="12sp"
+                                android:textColor="@color/error"
+                                android:visibility="gone"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRecordPayment"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Record Payment"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:icon="@drawable/ic_money"
+                        app:iconGravity="textStart"
+                        app:cornerRadius="12dp"
+                        android:layout_marginTop="24dp"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:textColor="@color/brand_primary"
+                        app:backgroundTint="@color/brand_primary_light"
+                        app:iconTint="@color/brand_primary" />
+                        
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            
+            <!-- Supply History Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_marginBottom="12dp">
+                
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Supply History"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/neutral_900" />
+                    
+                <TextView
+                    android:id="@+id/tvViewAllSupply"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View All"
+                    android:textSize="14sp"
+                    android:textColor="@color/brand_primary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="8dp" />
+            </LinearLayout>
+            
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSupplyEntries"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp" />
+            
+            <LinearLayout
+                android:id="@+id/tvNoSupplyEntries"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_water"
+                    app:tint="@color/neutral_300"
+                    android:contentDescription="No entries"
+                    android:layout_marginBottom="16dp" />
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No supply entries yet"
+                    android:textSize="16sp"
+                    android:textColor="@color/neutral_500"
+                    android:gravity="center" />
+            </LinearLayout>
+            
+            <!-- Payment History Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="12dp">
+                
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Payment History"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/neutral_900" />
+                    
+                <TextView
+                    android:id="@+id/tvViewAllPayments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View All"
+                    android:textSize="14sp"
+                    android:textColor="@color/brand_primary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="8dp" />
+            </LinearLayout>
+            
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPayments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp" />
+            
+            <LinearLayout
+                android:id="@+id/tvNoPayments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_money"
+                    app:tint="@color/neutral_300"
+                    android:contentDescription="No payments"
+                    android:layout_marginBottom="16dp" />
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No payments recorded yet"
+                    android:textSize="16sp"
+                    android:textColor="@color/neutral_500"
+                    android:gravity="center" />
+            </LinearLayout>
+            
+            <!-- Actions -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="24dp"
+                android:paddingHorizontal="16dp">
+                
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditFarmer"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="Edit Profile"
+                    app:icon="@drawable/ic_edit"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="12dp"
+                    android:layout_marginEnd="8dp"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:textColor="@color/neutral_700"
+                    app:strokeColor="@color/neutral_300"
+                    app:iconTint="@color/neutral_700" />
+                
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDeleteFarmer"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="Delete"
+                    app:icon="@drawable/ic_delete"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="12dp"
+                    android:layout_marginStart="8dp"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:textColor="@color/error"
+                    app:strokeColor="@color/error"
+                    app:iconTint="@color/error" />
+            </LinearLayout>
+            
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabNewSupply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="Add Supply"
+        android:textColor="@color/white"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@color/white"
+        app:backgroundTint="@color/brand_primary"
+        android:contentDescription="Add Supply Entry"
+        app:elevation="4dp" />
+    
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

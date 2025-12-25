@@ -1,0 +1,70 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/AASAV%20CHAUHAN/.gradle/wrapper/dists/gradle-8.13-bin/5xuhj0ry160q40clulazy9h7d/gradle-8.13/lib/native-platform-0.22-milestone-28.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:dataBindingMergeDependencyArtifactsDebug UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac
+C:\Users\AASAV CHAUHAN\AndroidStudioProjects\WaterSupplyManagement\app\src\main\java\com\watersupply\utils\ReportGenerator.java:196: error: incompatible types: String cannot be converted to double
+        drawCard(canvas, margin, y, cardW, cardH, "Total Supply", String.format("%.1f Hrs", totalHours), false, colorBorderCard, colorLightGray, colorDarkGray);
+                                                                               ^
+C:\Users\AASAV CHAUHAN\AndroidStudioProjects\WaterSupplyManagement\app\src\main\java\com\watersupply\utils\ReportGenerator.java:205: error: incompatible types: String cannot be converted to double
+        drawCard(canvas, margin + cardW + gap, y, cardW, cardH, "Total Charges", "₹" + String.format(Locale.US, "%.0f", totalBilled), false, colorBorderCard, colorLightGray, colorDarkGray);
+                                                                                     ^
+C:\Users\AASAV CHAUHAN\AndroidStudioProjects\WaterSupplyManagement\app\src\main\java\com\watersupply\utils\ReportGenerator.java:209: error: incompatible types: String cannot be converted to double
+        drawCard(canvas, margin + 2*(cardW + gap), y, cardW, cardH, "Pending Due", "₹" + String.format(Locale.US, "%.0f", pending), true, Color.TRANSPARENT, Color.argb(255, 255, 255, 255), Color.WHITE);
+                                                                                       ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+3 errors
+
+> Task :app:compileDebugJavaWithJavac FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/AASAV%20CHAUHAN/AndroidStudioProjects/WaterSupplyManagement/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  C:\Users\AASAV CHAUHAN\AndroidStudioProjects\WaterSupplyManagement\app\src\main\java\com\watersupply\utils\ReportGenerator.java:196: error: incompatible types: String cannot be converted to double
+          drawCard(canvas, margin, y, cardW, cardH, "Total Supply", String.format("%.1f Hrs", totalHours), false, colorBorderCard, colorLightGray, colorDarkGray);
+                                                                                 ^
+  C:\Users\AASAV CHAUHAN\AndroidStudioProjects\WaterSupplyManagement\app\src\main\java\com\watersupply\utils\ReportGenerator.java:205: error: incompatible types: String cannot be converted to double
+          drawCard(canvas, margin + cardW + gap, y, cardW, cardH, "Total Charges", "₹" + String.format(Locale.US, "%.0f", totalBilled), false, colorBorderCard, colorLightGray, colorDarkGray);
+                                                                                       ^
+  C:\Users\AASAV CHAUHAN\AndroidStudioProjects\WaterSupplyManagement\app\src\main\java\com\watersupply\utils\ReportGenerator.java:209: error: incompatible types: String cannot be converted to double
+          drawCard(canvas, margin + 2*(cardW + gap), y, cardW, cardH, "Pending Due", "₹" + String.format(Locale.US, "%.0f", pending), true, Color.TRANSPARENT, Color.argb(255, 255, 255, 255), Color.WHITE);
+                                                                                         ^
+  Note: Some input files use or override a deprecated API.
+  Note: Recompile with -Xlint:deprecation for details.
+  Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+  3 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 14s
+18 actionable tasks: 1 executed, 17 up-to-date

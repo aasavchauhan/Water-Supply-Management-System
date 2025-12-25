@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/neutral_100">
+
+    <!-- App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        android:background="@color/neutral_100">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/record_payment"
+            app:navigationIcon="@drawable/ic_back"
+            app:titleTextAppearance="?attr/textAppearanceTitleLarge"
+            app:titleTextColor="@color/neutral_900"
+            android:background="@color/neutral_100" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md">
+
+            <!-- Farmer Name Display Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/farmerDisplayCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/brand_primary"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/card_corner_radius">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/spacing_md">
+                    
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/farmerAvatarDisplay"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_person"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                        android:layout_marginEnd="@dimen/spacing_md"
+                        app:tint="@color/white"
+                        android:background="@drawable/bg_circle_light_blue"
+                        android:padding="8dp" />
+                    
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Recording payment from"
+                            android:textSize="@dimen/text_size_caption"
+                            android:textColor="@color/white"
+                            android:alpha="0.9"
+                            android:layout_marginBottom="@dimen/spacing_xxs" />
+                        
+                        <TextView
+                            android:id="@+id/tvFarmerNameDisplay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Farmer Name"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/white" />
+                        
+                        <TextView
+                            android:id="@+id/tvFarmerBalanceDisplay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Balance: ₹0.00"
+                            android:textSize="@dimen/text_size_caption"
+                            android:textColor="@color/white"
+                            android:alpha="0.9"
+                            android:layout_marginTop="@dimen/spacing_xxs" />
+                    </LinearLayout>
+                    
+                    <ImageView
+                        android:layout_width="@dimen/icon_size"
+                        android:layout_height="@dimen/icon_size"
+                        android:src="@drawable/ic_money"
+                        app:tint="@color/white"
+                        android:contentDescription="Payment"
+                        android:alpha="0.8" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Farmer Selection Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_sm">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/brand_primary"
+                            android:contentDescription="Farmer"
+                            android:layout_marginEnd="@dimen/spacing_sm"
+                            android:background="@drawable/bg_circle_light_blue"
+                            android:padding="6dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Farmer"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvSelectedFarmer"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Select a farmer"
+                            android:textSize="@dimen/text_size_body"
+                            android:textColor="@color/neutral_700"
+                            android:padding="@dimen/spacing_sm" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSelectFarmer"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Select"
+                            android:textColor="@color/brand_primary"
+                            app:strokeColor="@color/brand_primary"
+                            app:icon="@drawable/ic_arrow_down"
+                            app:iconGravity="end"
+                            app:iconTint="@color/brand_primary"
+                            app:iconSize="18dp" />
+                    </LinearLayout>
+
+                    <!-- Farmer Balance Display -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/balanceCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:visibility="gone"
+                        app:cardBackgroundColor="@color/error_50"
+                        app:cardElevation="0dp"
+                        app:cardCornerRadius="@dimen/spacing_sm"
+                        app:strokeColor="@color/error_200"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_md">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Current Balance"
+                                android:textSize="@dimen/text_size_caption"
+                                android:textColor="@color/error_700"
+                                android:textAllCaps="true"
+                                android:layout_marginBottom="@dimen/spacing_xxs" />
+
+                            <TextView
+                                android:id="@+id/tvCurrentBalance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0.00"
+                                android:textSize="@dimen/text_size_headline"
+                                android:textStyle="bold"
+                                android:textColor="@color/error_700" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Payment Details Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_md">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size"
+                            android:layout_height="@dimen/icon_size"
+                            android:src="@drawable/ic_money"
+                            app:tint="@color/brand_primary"
+                            android:contentDescription="Payment details"
+                            android:layout_marginEnd="@dimen/spacing_sm"
+                            android:background="@drawable/bg_circle_light_blue"
+                            android:padding="6dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Payment Details"
+                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:textStyle="bold"
+                            android:textColor="@color/neutral_900" />
+                    </LinearLayout>
+
+                    <!-- Payment Date -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Date"
+                        android:textSize="@dimen/text_size_caption"
+                        android:textColor="@color/neutral_500"
+                        android:textAllCaps="true"
+                        android:layout_marginBottom="@dimen/spacing_xxs" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/spacing_md">
+
+                        <TextView
+                            android:id="@+id/tvSelectedDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Today"
+                            android:textSize="@dimen/text_size_body"
+                            android:textColor="@color/neutral_900"
+                            android:padding="@dimen/spacing_sm"
+                            android:background="@drawable/bg_rounded_border" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSelectDate"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_sm"
+                            android:text="Change"
+                            android:textColor="@color/brand_primary"
+                            app:strokeColor="@color/brand_primary"
+                            app:icon="@drawable/ic_calendar"
+                            app:iconTint="@color/brand_primary"
+                            app:iconSize="18dp" />
+                    </LinearLayout>
+
+                    <!-- Amount -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/payment_amount"
+                        app:startIconDrawable="@drawable/ic_currency"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:prefixText="₹ "
+                        app:helperText="Amount received from farmer"
+                        app:helperTextTextColor="@color/neutral_500"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="@dimen/spacing_md">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAmount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textSize="@dimen/text_size_headline"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Payment Method -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Method"
+                        android:textSize="@dimen/text_size_caption"
+                        android:textColor="@color/neutral_500"
+                        android:textAllCaps="true"
+                        android:layout_marginBottom="@dimen/spacing_sm" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/paymentMethodGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        android:layout_marginBottom="@dimen/spacing_md">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCash"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_small"
+                            android:layout_weight="1"
+                            android:text="Cash" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOnline"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_small"
+                            android:layout_weight="1"
+                            android:text="Online" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCheque"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_small"
+                            android:layout_weight="1"
+                            android:text="Cheque" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                    <!-- Transaction ID (for Online payments) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilTransactionId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/transaction_id"
+                        app:startIconDrawable="@drawable/ic_info"
+                        app:startIconTint="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        app:helperText="UPI/Bank transaction reference"
+                        app:helperTextTextColor="@color/neutral_500"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:visibility="gone"
+                        android:layout_marginBottom="@dimen/spacing_md">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTransactionId"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textNoSuggestions"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Remarks -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/remarks"
+                        app:helperText="Optional notes"
+                        app:helperTextTextColor="@color/neutral_500"
+                        app:boxStrokeColor="@color/brand_primary"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etRemarks"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textMultiLine"
+                            android:minLines="2"
+                            android:gravity="top|start"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- New Balance Preview Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/newBalanceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/neutral_50"
+                app:cardElevation="0dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:strokeColor="@color/neutral_200"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_md">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="New Balance After Payment"
+                        android:textSize="@dimen/text_size_caption"
+                        android:textColor="@color/neutral_500"
+                        android:textAllCaps="true"
+                        android:layout_marginBottom="@dimen/spacing_xs" />
+
+                    <TextView
+                        android:id="@+id/tvNewBalance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₹0.00"
+                        android:textSize="@dimen/text_size_display"
+                        android:textStyle="bold"
+                        android:textColor="@color/brand_primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Save Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/record_payment"
+                android:textSize="@dimen/text_size_body"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_save"
+                app:iconGravity="textStart"
+                app:iconSize="20dp"
+                app:cornerRadius="@dimen/button_corner_radius"
+                app:backgroundTint="@null"
+                android:background="@drawable/bg_button_primary"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:layout_marginBottom="@dimen/spacing_lg" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

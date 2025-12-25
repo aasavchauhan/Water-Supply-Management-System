@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#FFF3E0"
+        android:pathData="M100,100m-90,0a90,90 0,1,1 180,0a90,90 0,1,1 -180,0"/>
+    
+    <!-- Credit Card -->
+    <path
+        android:fillColor="#F57C00"
+        android:pathData="M60,70h80v60h-80z"
+        android:strokeColor="#E65100"
+        android:strokeWidth="2"/>
+    <path
+        android:fillColor="#E65100"
+        android:pathData="M60,85h80v10h-80z"/>
+    
+    <!-- Dollar Sign -->
+    <path
+        android:fillColor="#FFF"
+        android:pathData="M95,95h10v5h-10z M95,105h10v5h-10z M95,115h10v5h-10z"/>
+    <path
+        android:fillColor="#FFB74D"
+        android:pathData="M115,102a8,8 0,1,1 0,16a8,8 0,1,1 0,-16z"/>
+</vector>

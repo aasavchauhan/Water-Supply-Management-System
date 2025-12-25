@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search"
+        android:title="Search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    
+    <item
+        android:id="@+id/action_filter"
+        android:icon="@drawable/ic_filter"
+        android:title="Filter by Date"
+        app:showAsAction="ifRoom" />
+    
+    <item
+        android:id="@+id/action_sort"
+        android:title="Sort">
+        <menu>
+            <item
+                android:id="@+id/action_sort_date"
+                android:title="Sort by Date" />
+            <item
+                android:id="@+id/action_sort_amount"
+                android:title="Sort by Amount" />
+        </menu>
+    </item>
+    
+    <item
+        android:id="@+id/action_clear_filter"
+        android:title="Clear Filter"
+        app:showAsAction="never" />
+    
+    <item
+        android:id="@+id/action_export"
+        android:icon="@drawable/ic_download"
+        android:title="Export to CSV"
+        app:showAsAction="ifRoom" />
+</menu>
