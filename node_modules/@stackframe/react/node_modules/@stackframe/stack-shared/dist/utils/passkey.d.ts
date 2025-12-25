@@ -1,1 +1,0 @@
-export { AuthenticationResponseJSON, AuthenticatorAttestationResponseJSON, PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON, RegistrationResponseJSON } from '@simplewebauthn/types';
