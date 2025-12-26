@@ -116,7 +116,8 @@ public class ReportsFragment extends Fragment {
         for (SupplyEntry entry : allSupplyEntries) {
             try {
                 Date entryDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(entry.getDate());
-                if (entryDate != null && !entryDate.before(start) && !entryDate.after(end)) {
+                boolean isDraft = "draft".equalsIgnoreCase(entry.getStatus());
+                if (entryDate != null && !isDraft && !entryDate.before(start) && !entryDate.after(end)) {
                     filteredSupplyEntries.add(entry);
                     if (entry.getTotalTimeUsed() != null) totalHours += entry.getTotalTimeUsed();
                     totalCharges += entry.getAmount();
