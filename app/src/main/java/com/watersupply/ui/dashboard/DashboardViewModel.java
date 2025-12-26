@@ -140,10 +140,40 @@ public class DashboardViewModel extends ViewModel {
     }
     
     public LiveData<List<SupplyEntry>> getDraftSupplyEntries() {
-        if (familyId != null) {
-            return supplyRepository.getDraftSupplyEntries(familyId);
+        androidx.lifecycle.MediatorLiveData<List<SupplyEntry>> result = new androidx.lifecycle.MediatorLiveData<>();
+        
+        if (familyId == null) return result;
+        
+        LiveData<List<SupplyEntry>> draftsSource = supplyRepository.getDraftSupplyEntries(familyId);
+        LiveData<List<com.watersupply.data.models.Farmer>> farmersSource = farmerRepository.getAllFarmers(familyId);
+        
+        result.addSource(draftsSource, drafts -> {
+            result.setValue(combineDraftsAndFarmers(drafts, farmersSource.getValue()));
+        });
+        
+        result.addSource(farmersSource, farmers -> {
+            result.setValue(combineDraftsAndFarmers(draftsSource.getValue(), farmers));
+        });
+        
+        return result;
+    }
+    
+    private List<SupplyEntry> combineDraftsAndFarmers(List<SupplyEntry> drafts, List<com.watersupply.data.models.Farmer> farmers) {
+        if (drafts == null) return null;
+        if (farmers == null) return drafts; // Can't map yet
+        
+        Map<String, String> farmerMap = new HashMap<>();
+        for (com.watersupply.data.models.Farmer f : farmers) {
+            farmerMap.put(f.getId(), f.getName());
         }
-        return new MutableLiveData<>();
+        
+        for (SupplyEntry entry : drafts) {
+            if (entry.getFarmerId() != null && farmerMap.containsKey(entry.getFarmerId())) {
+                entry.setFarmerName(farmerMap.get(entry.getFarmerId()));
+            }
+        }
+        
+        return drafts;
     }
     
     // Chart data methods

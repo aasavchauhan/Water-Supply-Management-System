@@ -42,6 +42,8 @@ public class ReportGenerator {
                                List<SupplyEntry> supplies, List<Payment> payments, 
                                Map<String, String> farmerNameMap) {
         
+        if (farmerNameMap == null) farmerNameMap = new java.util.HashMap<>();
+        
         PdfDocument document = new PdfDocument();
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create(); // A4
         
@@ -55,9 +57,9 @@ public class ReportGenerator {
             
             Toast.makeText(context, "Report saved: " + fileName, Toast.LENGTH_LONG).show();
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error saving report", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error saving report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         } finally {
             document.close();
         }
@@ -69,6 +71,9 @@ public class ReportGenerator {
     private void drawV1(PdfDocument document, PdfDocument.PageInfo pageInfo, String farmerName, String farmerId,
                        Date startDate, Date endDate, List<SupplyEntry> supplies, List<Payment> payments,
                        Map<String, String> farmerNameMap) {
+        
+        if (supplies == null) supplies = new ArrayList<>();
+        if (payments == null) payments = new ArrayList<>();
         
         PdfDocument.Page page = document.startPage(pageInfo);
         Canvas canvas = page.getCanvas();
@@ -168,13 +173,17 @@ public class ReportGenerator {
         // --- Cards ---
         double totalHours = 0;
         double totalBilled = 0;
-        for(SupplyEntry s : supplies) {
-            totalHours += s.getTotalTimeUsed();
-            totalBilled += s.getAmount();
+        if (supplies != null) {
+            for(SupplyEntry s : supplies) {
+                totalHours += s.getTotalTimeUsed() != null ? s.getTotalTimeUsed() : 0.0;
+                totalBilled += s.getAmount(); // Primitive
+            }
         }
         
         double totalPaid = 0;
-        for(Payment p : payments) totalPaid += p.getAmount();
+        if (payments != null) {
+            for(Payment p : payments) totalPaid += p.getAmount(); // Primitive
+        }
         
         double pending = totalBilled - totalPaid;
         
@@ -211,35 +220,45 @@ public class ReportGenerator {
         List<ReportItem> items = new ArrayList<>();
         try {
             SimpleDateFormat pF = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            for(SupplyEntry s : supplies) {
-                ReportItem i = new ReportItem();
-                Date d = pF.parse(s.getDate());
-                i.timestamp = d != null ? d.getTime() : 0;
-                i.date = shortDateFormat.format(d != null ? d : new Date());
-                i.details = String.format(Locale.US, "%.1f Hrs @ ₹%.0f/hr", s.getTotalTimeUsed(), s.getRate());
-                String fName = s.getFarmerName();
-                if ((fName == null || fName.isEmpty()) && s.getFarmerId() != null && farmerNameMap != null) {
-                    fName = farmerNameMap.get(s.getFarmerId());
+            if (supplies != null) {
+                for(SupplyEntry s : supplies) {
+                    if (s.getDate() == null || "draft".equalsIgnoreCase(s.getStatus())) continue;
+                    
+                    ReportItem i = new ReportItem();
+                    Date d = pF.parse(s.getDate());
+                    i.timestamp = d != null ? d.getTime() : 0;
+                    i.date = shortDateFormat.format(d != null ? d : new Date());
+                    
+                    double hrs = s.getTotalTimeUsed() != null ? s.getTotalTimeUsed() : 0.0;
+                    double rate = s.getRate(); // Primitive, safe
+                    i.details = String.format(Locale.US, "%.1f Hrs @ ₹%.0f/hr", hrs, rate);
+                    
+                    String fName = s.getFarmerName();
+                    if ((fName == null || fName.isEmpty()) && s.getFarmerId() != null && farmerNameMap != null) {
+                        fName = farmerNameMap.get(s.getFarmerId());
+                    }
+                    i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
+                    i.amount = s.getAmount(); // Primitive, safe
+                    i.isPayment = false;
+                    items.add(i);
                 }
-                i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
-                i.amount = s.getAmount();
-                i.isPayment = false;
-                items.add(i);
             }
-            for(Payment p : payments) {
-                ReportItem i = new ReportItem();
-                Date d = pF.parse(p.getPaymentDate());
-                i.timestamp = d != null ? d.getTime() : 0;
-                i.date = shortDateFormat.format(d != null ? d : new Date());
-                i.details = p.getPaymentMethod() != null ? p.getPaymentMethod() : "Payment";
-                String fName = p.getFarmerName();
-                if ((fName == null || fName.isEmpty()) && p.getFarmerId() != null && farmerNameMap != null) {
-                    fName = farmerNameMap.get(p.getFarmerId());
+            if (payments != null) {
+                for(Payment p : payments) {
+                    ReportItem i = new ReportItem();
+                    Date d = pF.parse(p.getPaymentDate());
+                    i.timestamp = d != null ? d.getTime() : 0;
+                    i.date = shortDateFormat.format(d != null ? d : new Date());
+                    i.details = p.getPaymentMethod() != null ? p.getPaymentMethod() : "Payment";
+                    String fName = p.getFarmerName();
+                    if ((fName == null || fName.isEmpty()) && p.getFarmerId() != null && farmerNameMap != null) {
+                        fName = farmerNameMap.get(p.getFarmerId());
+                    }
+                    i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
+                    i.amount = p.getAmount(); // Primitive, safe
+                    i.isPayment = true;
+                    items.add(i);
                 }
-                i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
-                i.amount = p.getAmount();
-                i.isPayment = true;
-                items.add(i);
             }
             Collections.sort(items, (o1, o2) -> Long.compare(o1.timestamp, o2.timestamp));
         } catch(Exception e){}

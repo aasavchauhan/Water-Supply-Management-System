@@ -105,6 +105,26 @@ public class ProfileFragment extends Fragment {
         
         // Add edit profile capability
         binding.tvUserName.setOnClickListener(v -> showEditProfileDialog());
+        
+        // Developer Link
+        binding.tvAppDeveloper.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/aasavchauhan"));
+                startActivity(intent);
+            } catch (Exception e) {
+                android.widget.Toast.makeText(requireContext(), "Could not open browser", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Version/Releases Link
+        binding.tvAppVersion.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/aasavchauhan/Water-Supply-Management-System/releases"));
+                startActivity(intent);
+            } catch (Exception e) {
+                android.widget.Toast.makeText(requireContext(), "Could not open browser", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     
     private void showEditProfileDialog() {
