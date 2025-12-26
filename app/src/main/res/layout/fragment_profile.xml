@@ -250,14 +250,26 @@
 
         <!-- Developer Credit -->
         <TextView
+            android:id="@+id/tvAppDeveloper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Aasav Chauhan 2025"
             android:gravity="center"
             android:textSize="12sp"
             android:textColor="@color/neutral_400"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginTop="24dp" />
+
+        <!-- App Version -->
+        <TextView
+            android:id="@+id/tvAppVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Version 1.0"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="@color/neutral_400"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

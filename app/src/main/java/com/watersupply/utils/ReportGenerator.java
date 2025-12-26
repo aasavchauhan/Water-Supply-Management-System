@@ -218,8 +218,10 @@ public class ReportGenerator {
                 i.date = shortDateFormat.format(d != null ? d : new Date());
                 i.details = String.format(Locale.US, "%.1f Hrs @ ₹%.0f/hr", s.getTotalTimeUsed(), s.getRate());
                 String fName = s.getFarmerName();
-                if (fName == null && s.getFarmerId() != null) fName = farmerNameMap.get(s.getFarmerId());
-                i.farmerName = fName != null ? fName : "Unknown";
+                if ((fName == null || fName.isEmpty()) && s.getFarmerId() != null && farmerNameMap != null) {
+                    fName = farmerNameMap.get(s.getFarmerId());
+                }
+                i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
                 i.amount = s.getAmount();
                 i.isPayment = false;
                 items.add(i);
@@ -229,10 +231,12 @@ public class ReportGenerator {
                 Date d = pF.parse(p.getPaymentDate());
                 i.timestamp = d != null ? d.getTime() : 0;
                 i.date = shortDateFormat.format(d != null ? d : new Date());
-                i.details = p.getPaymentMethod();
+                i.details = p.getPaymentMethod() != null ? p.getPaymentMethod() : "Payment";
                 String fName = p.getFarmerName();
-                if (fName == null && p.getFarmerId() != null) fName = farmerNameMap.get(p.getFarmerId());
-                i.farmerName = fName != null ? fName : "Unknown";
+                if ((fName == null || fName.isEmpty()) && p.getFarmerId() != null && farmerNameMap != null) {
+                    fName = farmerNameMap.get(p.getFarmerId());
+                }
+                i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
                 i.amount = p.getAmount();
                 i.isPayment = true;
                 items.add(i);
@@ -313,7 +317,11 @@ public class ReportGenerator {
              
              if (isAllFarmers) {
                  String f = item.farmerName;
-                 if(f.length() > 15) f = f.substring(0, 13) + "..";
+                 if (f != null && f.length() > 15) {
+                     f = f.substring(0, 13) + "..";
+                 } else if (f == null) {
+                     f = "";
+                 }
                  canvas.drawText(f, c2, y + 20, paint);
              }
              

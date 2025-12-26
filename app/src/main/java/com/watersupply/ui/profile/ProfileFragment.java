@@ -46,6 +46,14 @@ public class ProfileFragment extends Fragment {
         
         loadUserInfo();
         setupClickListeners();
+        
+        // Set App Version
+        try {
+            String versionName = com.watersupply.BuildConfig.VERSION_NAME;
+            binding.tvAppVersion.setText("Version " + versionName);
+        } catch (Exception e) {
+            binding.tvAppVersion.setText("Version 1.0");
+        }
     }
     
     private void loadUserInfo() {
