@@ -1,194 +1,148 @@
-# Water Supply Management - Native Android App
+# 💧 Water Supply Management System
+> **A robust, offline-first Android solution for modern water distribution management.**
 
-![Build Status](https://github.com/aasavchauhan/WaterSupplyManagement/actions/workflows/build_release.yml/badge.svg)
-![Latest Release](https://img.shields.io/github/v/release/aasavchauhan/WaterSupplyManagement?label=Latest%20Version&style=flat-square&color=blue)
-![License](https://img.shields.io/github/license/aasavchauhan/WaterSupplyManagement?style=flat-square)
-
-A native Android application for managing water supply distribution to farmers with offline-first architecture.
+![Build Status](https://github.com/aasavchauhan/Water-Supply-Management-System/actions/workflows/build_release.yml/badge.svg)
+![Latest Release](https://img.shields.io/github/v/release/aasavchauhan/Water-Supply-Management-System?label=Latest%20Version&style=flat-square&color=2ea44f)
+![License](https://img.shields.io/github/license/aasavchauhan/Water-Supply-Management-System?style=flat-square&color=0056b3)
+![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android)
 
 <div align="center">
-  <h3>📲 <a href="https://github.com/aasavchauhan/WaterSupplyManagement/releases/latest">Download Latest APK</a></h3>
+  <br>
+  <img src="https://raw.githubusercontent.com/aasavchauhan/Water-Supply-Management-System/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="App Icon" width="120" height="120" style="border-radius: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <h3 style="margin-top: 20px;">Streamline. Track. Manage.</h3>
+  <p>Efficiently manage farmer supplies, payments, and billing with precision.</p>
+  
+  <a href="https://github.com/aasavchauhan/Water-Supply-Management-System/releases/latest">
+    <img src="https://img.shields.io/badge/Download_Latest_APK-blue?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" height="40">
+  </a>
 </div>
-
-## 📦 Automated Releases
-This repository features an automated CI/CD pipeline.
-Every time a tag (e.g., `v1.0`) is pushed, a new **APK** is automatically built and attached to the Release.
-
-
-## 🎯 Features
-
-- **User Authentication**: PIN-based login with biometric support
-- **Farmer Management**: Add, view, and manage farmer profiles
-- **Supply Entry**: Dual billing system (time-based and meter-based)
-- **Payment Tracking**: Record and track farmer payments
-- **Dashboard**: Quick overview of farmers, supply entries, and revenue
-- **Offline-First**: Full functionality without internet connection using Room database
-
-## 🏗️ Architecture
-
-- **Pattern**: MVVM (Model-View-ViewModel)
-- **Language**: Java 11+
-- **Database**: Room Persistence Library (SQLite)
-- **UI**: Material Design 3
-- **DI**: Hilt (Dagger 2)
-- **Async**: LiveData + ViewModel
-
-## 📋 Prerequisites
-
-- Android Studio Hedgehog+ (2023.1.1 or later)
-- Java JDK 11+ (OpenJDK recommended)
-- Android SDK 26+ (Android 8.0 Oreo)
-- Minimum Android device: API 26
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone <your-repo-url>
-cd WaterSupplyManagement
-```
-
-### 2. Open in Android Studio
-
-1. Launch Android Studio
-2. Click "Open" and select the project folder
-3. Wait for Gradle sync to complete
-
-### 3. Run the App
-
-**Option A: Using Android Studio**
-1. Click "Sync Project with Gradle Files" (elephant icon)
-2. Connect Android device via USB (with USB debugging enabled) or start an emulator
-3. Click "Run" (green play button) or press Shift+F10
-
-**Option B: Using Command Line**
-
-```bash
-# Build debug APK
-.\gradlew.bat assembleDebug
-
-# Install on connected device
-.\gradlew.bat installDebug
-
-# Or build and run in one command
-.\gradlew.bat installDebug
-adb shell am start -n com.watersupply/.MainActivity
-```
-
-## 📱 App Structure
-
-```
-com.watersupply/
-├── data/
-│   ├── database/
-│   │   ├── entities/          # Room entities (User, Farmer, SupplyEntry, etc.)
-│   │   ├── dao/               # Data Access Objects
-│   │   └── AppDatabase.java  # Room database
-│   └── repository/            # Repository layer for data operations
-├── ui/
-│   ├── auth/                  # Login and registration
-│   ├── dashboard/             # Dashboard with stats
-│   ├── farmers/               # Farmer management screens
-│   └── supply/                # Supply entry screens
-├── utils/                     # Utility classes (BillingCalculator, formatters)
-├── di/                        # Hilt dependency injection modules
-└── WaterSupplyApplication.java
-```
-
-## 🗄️ Database Schema
-
-### Entities
-- **User**: Authentication and user profile
-- **Farmer**: Farmer profiles with balance tracking
-- **SupplyEntry**: Water supply transactions (time or meter-based)
-- **Payment**: Payment records
-- **AppSettings**: Business settings and preferences
-
-## 🎨 Design System
-
-- **Theme**: Material Design 3 with water-themed teal colors
-- **Spacing**: 4dp grid system
-- **Components**: Material buttons, cards, text fields
-- **Typography**: Sans-serif with Material type scale
-
-## 📦 Dependencies
-
-Key libraries used:
-- Material Design 3 (1.11.0)
-- Room Database (2.6.1)
-- Lifecycle Components (2.7.0)
-- Navigation Component (2.7.6)
-- Hilt for DI (2.50)
-- Glide for images (4.16.0)
-- Biometric API (1.2.0-alpha05)
-
-## 🔧 Configuration
-
-### Update Package Name
-To change the package name from `com.watersupply`:
-1. Update `namespace` in `app/build.gradle.kts`
-2. Refactor package in Android Studio (Right-click package → Refactor → Rename)
-3. Update `applicationId` in `app/build.gradle.kts`
-
-### Database Migrations
-For schema changes:
-1. Increment version in `AppDatabase.java`
-2. Add migration strategy or use `fallbackToDestructiveMigration()` for development
-
-## 🧪 Testing
-
-```bash
-# Run unit tests
-.\gradlew.bat test
-
-# Run instrumented tests
-.\gradlew.bat connectedAndroidTest
-```
-
-## 📝 Usage Flow
-
-1. **First Launch**: User registers with mobile number and 4-digit PIN
-2. **Login**: Enter mobile and PIN (biometric optional)
-3. **Dashboard**: View summary of farmers, supply entries, revenue
-4. **Add Farmer**: Click FAB → Enter farmer details → Save
-5. **Add Supply Entry**: Select farmer → Choose billing method (time/meter) → Enter readings → Save
-6. **View History**: Browse supply entries and payments
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🐛 Troubleshooting
-
-### Build Fails with "Unable to find Java"
-- Ensure JDK 11+ is installed
-- Set `JAVA_HOME` environment variable
-- Or set `org.gradle.java.home` in `gradle.properties`
-
-### Hilt Dependency Injection Errors
-- Clean and rebuild: `.\gradlew.bat clean build`
-- Invalidate caches in Android Studio: File → Invalidate Caches
-
-### Room Database Errors
-- Check entity annotations (`@Entity`, `@PrimaryKey`, `@ColumnInfo`)
-- Verify DAO queries are correct
-- For schema changes, increment database version
-
-## 📞 Support
-
-For issues or questions:
-- Open an issue on GitHub
-- Contact: aasavchauhan@gmail.com
 
 ---
 
-**Built with ❤️ using Native Android and Material Design 3**
+## 🚀 Overview
+
+**Water Supply Management** is a professional-grade native Android application designed to digitize the water distribution workflow for agricultural cooperatives and private suppliers. Engineered for reliability in rural connectivity environments, it features a robust **offline-first architecture** synchronized with **Firebase Cloud**.
+
+It simplifies complex billing scenarios with support for both **meter-based** and **time-based** water usage, automated PDF reporting, and integrated financial tracking.
+
+---
+
+## ✨ Key Features
+
+### 👥 Farmer Management
+*   **Centralized Directory**: Maintain detailed profiles of all farmers.
+*   **Quick Search**: Instantly locate farmers by name or ID.
+*   **Balance Tracking**: Real-time view of outstanding dues and credit limits.
+
+### ⏱️ Supply Tracking
+*   **Dual Billing Modes**:
+    *   **Time-Based**: Auto-calculated costs based on pump run hours.
+    *   **Meter-Based**: Precise billing using start/stop meter readings.
+*   **Live Drafts**: Start a supply session and let it run in the background (even if the app closes).
+*   **Pause/Resume**: Handle interruptions effortlessly without losing data.
+
+### 💰 Financials & Payments
+*   **Transaction Logs**: Securely record all payments (Cash/UPI/Bank Transfer).
+*   **Revenue Dashboard**: Visual insights into total revenue, pending collections, and monthly trends.
+*   **Invoice Generation**: Auto-calculate bills based on configurable rates.
+
+### 📊 Reporting & Analytics
+*   **PDF Exports**: Generate professional invoices and statements sharing via WhatsApp/Email.
+*   **Dynamic filtering**: Filter reports by date range, farmer, or payment status.
+*   **Dashboard Charts**: Interactive graphs powered by *MPAndroidChart*.
+
+### 🔒 Security & Performance
+*   **Biometric Login**: Secure app access using fingerprint authentication.
+*   **Cloud Sync**: Real-time data synchronization with Firebase Firestore.
+*   **Offline Capability**: Full functionality without internet; syncs automatically when online.
+
+---
+
+## 📱 Screenshots
+
+| **Dashboard** | **Farmer Profile** | **Supply Entry** | **Reports** |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="200"/> | <img src="docs/screenshots/profile.png" alt="Profile" width="200"/> | <img src="docs/screenshots/supply.png" alt="Supply" width="200"/> | <img src="docs/screenshots/report.png" alt="Reports" width="200"/> |
+
+*(Note: Screenshots to be added in `docs/screenshots/`)*
+
+---
+
+## 🛠️ Technology Stack
+
+Built with modern Android development standards for performance and maintainability.
+
+*   **Language**: [Java 11+](https://docs.oracle.com/en/java/)
+*   **Architecture**: MVVM (Model-View-ViewModel)
+*   **UI Toolkit**: Material Design 3 (XML + ViewBinding)
+*   **Dependency Injection**: [Hilt (Dagger)](https://dagger.dev/hilt/)
+*   **Cloud Backend**: [Firebase Firestore](https://firebase.google.com/docs/firestore) & Auth
+*   **Asynchronous Processing**: RxJava / LiveData
+*   **PDF Generation**: Native `android.graphics.pdf`
+*   **Charting**: [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
+
+---
+
+## ⚙️ Installation
+
+### Option 1: Install APK directly
+Download the latest signed APK from the [Releases Page](https://github.com/aasavchauhan/Water-Supply-Management-System/releases).
+
+### Option 2: Build from Source
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/aasavchauhan/Water-Supply-Management-System.git
+    ```
+2.  **Open in Android Studio** (Hedgehog or newer).
+3.  **Add `google-services.json`**:
+    *   Create a project in [Firebase Console](https://console.firebase.google.com/).
+    *   Add an Android app with package `com.watersupply`.
+    *   Download `google-services.json` and place it in the `/app` folder.
+4.  **Build & Run**:
+    ```bash
+    ./gradlew assembleDebug
+    ```
+
+---
+
+## 📦 Automated Workflows
+
+This repository utilizes **GitHub Actions** for robust CI/CD:
+
+1.  **Build Validation**: Every push to `main` is compiled to ensure code integrity.
+2.  **Release Automation**: Pushing a tag (e.g., `v1.0.4`) automatically:
+    *   Builds a release APK.
+    *   Generates release notes.
+    *   Publishes it to GitHub Releases.
+
+---
+
+## 🤝 Contribution
+
+Contributions are welcome! We follow the "Fork-and-Pull" Git workflow.
+
+1.  **Fork** the repo on GitHub.
+2.  **Clone** your fork locally.
+3.  **Create** a new branch (`git checkout -b feature/amazing-feature`).
+4.  **Commit** your changes.
+5.  **Push** to your fork.
+6.  Submit a **Pull Request**.
+
+Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+  <p>Developed with ❤️ by <b>Aasav Chauhan</b></p>
+  <p>
+    <a href="https://github.com/aasavchauhan">GitHub</a> • 
+    <a href="mailto:aasavchauhan@gmail.com">Contact</a>
+  </p>
+  <p>© 2025 Water Supply Management System</p>
+</div>
