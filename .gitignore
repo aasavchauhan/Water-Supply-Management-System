@@ -19,3 +19,4 @@ google-services.json
 *.keystore
 *.key
 .idea/
+/google-services.json

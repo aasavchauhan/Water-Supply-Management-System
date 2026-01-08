@@ -10,6 +10,13 @@
     <string name="dont_have_account">Don\'t have an account?</string>
     <string name="register_now">Register Now</string>
     <string name="biometric_login">Use Fingerprint</string>
+    <string name="send_otp">Send OTP</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="verify_otp">Verify &amp; Login</string>
+    <string name="otp_sent">OTP Sent Successfully</string>
+    <string name="resend_otp">Resend OTP</string>
+    <string name="invalid_otp">Invalid OTP</string>
+    <string name="verifying">Verifying...</string>
     
      Dashboard
     <string name="dashboard_title">Dashboard</string>
@@ -78,5 +85,5 @@
 
     
     <!-- Auth Config (Placeholder - will be overridden by google-services plugin if valid JSON exists) -->
-    <string name="google_server_client_id">YOUR_WEB_CLIENT_ID</string>
+    <!-- <string name="google_server_client_id">YOUR_WEB_CLIENT_ID</string> -->
 </resources>

@@ -33,6 +33,9 @@ public class RegisterActivity extends AppCompatActivity {
     private ActivityRegisterBinding binding;
     private GoogleSignInClient googleSignInClient;
     private boolean isEmailRegister = false;
+    private boolean isOtpSent = false;
+    private String verificationId;
+    private com.google.firebase.auth.PhoneAuthProvider.ForceResendingToken resendToken;
     
     @Inject
     AuthRepository authRepository;
@@ -60,7 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
     
     private void setupGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.google_server_client_id))
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -71,24 +74,35 @@ public class RegisterActivity extends AppCompatActivity {
             if (isChecked) {
                 if (checkedId == R.id.btnMethodEmail) {
                     isEmailRegister = true;
+                    isOtpSent = false;
                     binding.tilMobile.setVisibility(View.GONE);
                     binding.tilEmail.setVisibility(View.VISIBLE);
+                    binding.tilPin.setVisibility(View.VISIBLE);
+                    binding.tilConfirmPin.setVisibility(View.VISIBLE);
                     binding.tilPin.setHint("Password");
                     binding.tilConfirmPin.setHint("Confirm Password");
+                    binding.etPin.setText("");
+                    binding.etConfirmPin.setText("");
                     binding.etPin.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     binding.etConfirmPin.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     binding.etPin.setFilters(new android.text.InputFilter[]{});
                     binding.etConfirmPin.setFilters(new android.text.InputFilter[]{});
+                    binding.btnRegister.setText("Register");
                 } else {
                     isEmailRegister = false;
+                    isOtpSent = false;
                     binding.tilMobile.setVisibility(View.VISIBLE);
                     binding.tilEmail.setVisibility(View.GONE);
-                    binding.tilPin.setHint("4-Digit PIN");
-                    binding.tilConfirmPin.setHint("Confirm PIN");
-                    binding.etPin.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                    binding.etConfirmPin.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                    binding.etPin.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(4)});
-                    binding.etConfirmPin.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(4)});
+                    // Hide PIN fields initially for Mobile
+                    binding.tilPin.setVisibility(View.GONE);
+                    binding.tilConfirmPin.setVisibility(View.GONE);
+                    
+                    binding.etPin.setText("");
+                    binding.tilPin.setHint(getString(R.string.enter_otp));
+                    binding.etPin.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    binding.etPin.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(6)});
+                    
+                    binding.btnRegister.setText(getString(R.string.send_otp));
                 }
             }
         });
@@ -97,25 +111,126 @@ public class RegisterActivity extends AppCompatActivity {
     private void setupClickListeners() {
         binding.btnRegister.setOnClickListener(v -> {
             String name = binding.etName.getText().toString().trim();
-            String pin = binding.etPin.getText().toString().trim();
-            String confirmPin = binding.etConfirmPin.getText().toString().trim();
             
             if (isEmailRegister) {
                 String email = binding.etEmail.getText().toString().trim();
-                if (validateEmailInput(name, email, pin, confirmPin)) {
-                    registerWithEmail(name, email, pin);
+                String password = binding.etPin.getText().toString().trim();
+                String confirmPin = binding.etConfirmPin.getText().toString().trim();
+                
+                if (validateEmailInput(name, email, password, confirmPin)) {
+                    registerWithEmail(name, email, password);
                 }
             } else {
-                String mobile = binding.etMobile.getText().toString().trim();
-                if (validateMobileInput(name, mobile, pin, confirmPin)) {
-                    registerWithMobile(name, mobile, pin);
-                }
+                handleMobileRegister(name);
             }
         });
         
         binding.btnGoogle.setOnClickListener(v -> signInWithGoogle());
         
         binding.tvLogin.setOnClickListener(v -> finish());
+    }
+    
+    private void handleMobileRegister(String name) {
+        String mobile = binding.etMobile.getText().toString().trim();
+        
+        if (name.isEmpty()) {
+            binding.tilName.setError("Name is required");
+            return;
+        }
+        if (mobile.isEmpty() || mobile.length() != 10) {
+            binding.tilMobile.setError("Valid 10-digit mobile number required");
+            return;
+        }
+        binding.tilName.setError(null);
+        binding.tilMobile.setError(null);
+        
+        if (!isOtpSent) {
+            sendOtp(mobile);
+        } else {
+            String otp = binding.etPin.getText().toString().trim();
+            if (otp.isEmpty() || otp.length() < 6) {
+                binding.tilPin.setError(getString(R.string.invalid_otp));
+                return;
+            }
+            if (verificationId == null) {
+                Toast.makeText(this, "Error: Verification ID missing. Resend OTP.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            verifyOtp(verificationId, otp, name);
+        }
+    }
+    
+    private void sendOtp(String mobile) {
+        showLoading(true);
+        binding.btnRegister.setText("Sending...");
+        
+        authRepository.sendOtp(this, mobile, new com.google.firebase.auth.PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            @Override
+            public void onVerificationCompleted(@androidx.annotation.NonNull com.google.firebase.auth.PhoneAuthCredential credential) {
+                String code = credential.getSmsCode();
+                if (code != null) {
+                    binding.etPin.setText(code);
+                    String name = binding.etName.getText().toString().trim();
+                    verifyOtp(verificationId, code, name);
+                }
+            }
+
+            @Override
+            public void onVerificationFailed(@androidx.annotation.NonNull com.google.firebase.FirebaseException e) {
+                showLoading(false);
+                binding.btnRegister.setText(getString(R.string.send_otp));
+                Toast.makeText(RegisterActivity.this, "Verification Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCodeSent(@androidx.annotation.NonNull String s, @androidx.annotation.NonNull com.google.firebase.auth.PhoneAuthProvider.ForceResendingToken token) {
+                showLoading(false);
+                verificationId = s;
+                resendToken = token;
+                
+                isOtpSent = true;
+                binding.tilPin.setVisibility(View.VISIBLE); // Show OTP input
+                binding.etPin.requestFocus();
+                binding.btnRegister.setText(getString(R.string.verify_otp));
+                Toast.makeText(RegisterActivity.this, getString(R.string.otp_sent), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    private void verifyOtp(String vId, String code, String name) {
+        showLoading(true);
+        binding.btnRegister.setText(getString(R.string.verifying));
+        
+        authRepository.verifyOtp(vId, code, new AuthRepository.OnAuthListener() {
+            @Override
+            public void onAuthSuccess(String userId) {
+                // User verified and created/signed in. Now update Name.
+                authRepository.updateUserName(userId, name, new AuthRepository.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccess(String userId) {
+                         showLoading(false);
+                         Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                         Intent intent = new Intent(RegisterActivity.this, com.watersupply.ui.dashboard.DashboardActivity.class);
+                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                         startActivity(intent);
+                         finish();
+                    }
+                    
+                    @Override
+                    public void onAuthFailure(String error) {
+                        showLoading(false);
+                        Toast.makeText(RegisterActivity.this, "Failed to update profile: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onAuthFailure(String error) {
+                showLoading(false);
+                binding.btnRegister.setText(getString(R.string.verify_otp));
+                Toast.makeText(RegisterActivity.this, "Verification failed: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     
     private void signInWithGoogle() {
@@ -139,7 +254,6 @@ public class RegisterActivity extends AppCompatActivity {
             public void onAuthSuccess(String userId) {
                 showLoading(false);
                 Toast.makeText(RegisterActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
-                // Navigate to Dashboard or finish
                 Intent intent = new Intent(RegisterActivity.this, com.watersupply.ui.dashboard.DashboardActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -152,30 +266,6 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this, "Registration failed: " + error, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-    
-    private boolean validateMobileInput(String name, String mobile, String pin, String confirmPin) {
-        if (name.isEmpty()) {
-            binding.tilName.setError("Name is required");
-            return false;
-        }
-        if (mobile.isEmpty() || mobile.length() != 10) {
-            binding.tilMobile.setError("Valid 10-digit mobile number required");
-            return false;
-        }
-        if (pin.isEmpty() || pin.length() != 4) {
-            binding.tilPin.setError("4-digit PIN required");
-            return false;
-        }
-        if (!pin.equals(confirmPin)) {
-            binding.tilConfirmPin.setError("PINs do not match");
-            return false;
-        }
-        binding.tilName.setError(null);
-        binding.tilMobile.setError(null);
-        binding.tilPin.setError(null);
-        binding.tilConfirmPin.setError(null);
-        return true;
     }
     
     private boolean validateEmailInput(String name, String email, String password, String confirmPassword) {
@@ -200,31 +290,6 @@ public class RegisterActivity extends AppCompatActivity {
         binding.tilPin.setError(null);
         binding.tilConfirmPin.setError(null);
         return true;
-    }
-    
-    private void registerWithMobile(String name, String mobile, String pin) {
-        showLoading(true);
-        // Pseudo-mobile registration
-        String email = mobile + "@watersupply.app";
-        String password = pin + mobile;
-        
-        authRepository.registerWithEmail(email, password, name, mobile, 
-            new AuthRepository.OnAuthListener() {
-                @Override
-                public void onAuthSuccess(String userId) {
-                    showLoading(false);
-                    Toast.makeText(RegisterActivity.this, 
-                        "Registration successful! Please login", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                
-                @Override
-                public void onAuthFailure(String error) {
-                    showLoading(false);
-                    Toast.makeText(RegisterActivity.this, 
-                        "Registration failed: " + error, Toast.LENGTH_SHORT).show();
-                }
-            });
     }
     
     private void registerWithEmail(String name, String email, String password) {

@@ -55,6 +55,7 @@ public class AuthRepository {
                     firestore.collection("users").document(userId)
                         .set(userData)
                         .addOnSuccessListener(aVoid -> {
+                            firebaseUser.sendEmailVerification();
                             saveUserSession(userId, userId, "admin", name, mobile);
                             listener.onAuthSuccess(userId);
                         })
@@ -142,7 +143,8 @@ public class AuthRepository {
                                 Map<String, Object> userData = new HashMap<>();
                                 userData.put("name", firebaseUser.getDisplayName());
                                 userData.put("email", firebaseUser.getEmail());
-                                userData.put("mobile", firebaseUser.getPhoneNumber()); // Might be null
+                                String phone = firebaseUser.getPhoneNumber();
+                                userData.put("mobile", phone != null ? phone : "");
                                 userData.put("role", "admin");
                                 userData.put("familyId", userId);
                                 userData.put("createdAt", System.currentTimeMillis());
@@ -236,8 +238,90 @@ public class AuthRepository {
         void onAuthSuccess(String userId);
         void onAuthFailure(String error);
     }
+    
+    public void sendPasswordResetEmail(String email, OnAuthListener listener) {
+        firebaseAuth.sendPasswordResetEmail(email)
+            .addOnSuccessListener(aVoid -> listener.onAuthSuccess("Email Sent"))
+            .addOnFailureListener(e -> listener.onAuthFailure(e.getMessage()));
+    }
     public androidx.lifecycle.LiveData<com.watersupply.data.models.User> getUser(String userId) {
         com.google.firebase.firestore.DocumentReference docRef = firestore.collection("users").document(userId);
         return new com.watersupply.data.firebase.FirestoreDocumentLiveData<>(docRef, com.watersupply.data.models.User.class);
+    }
+    
+    // Phone Authentication
+    public void sendOtp(android.app.Activity activity, String mobile, com.google.firebase.auth.PhoneAuthProvider.OnVerificationStateChangedCallbacks callbacks) {
+        com.google.firebase.auth.PhoneAuthOptions options =
+            com.google.firebase.auth.PhoneAuthOptions.newBuilder(firebaseAuth)
+            .setPhoneNumber("+91" + mobile)       // Phone number to verify (Hardcoded +91 for now, or assume formatted)
+            .setTimeout(60L, java.util.concurrent.TimeUnit.SECONDS) // Timeout and unit
+            .setActivity(activity)                 // Activity (for callback binding)
+            .setCallbacks(callbacks)          // OnVerificationStateChangedCallbacks
+            .build();
+        com.google.firebase.auth.PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+    
+    public void verifyOtp(String verificationId, String code, OnAuthListener listener) {
+        com.google.firebase.auth.PhoneAuthCredential credential = com.google.firebase.auth.PhoneAuthProvider.getCredential(verificationId, code);
+        signInWithPhoneCredential(credential, listener);
+    }
+    
+    private void signInWithPhoneCredential(com.google.firebase.auth.PhoneAuthCredential credential, OnAuthListener listener) {
+        firebaseAuth.signInWithCredential(credential)
+            .addOnSuccessListener(authResult -> {
+                FirebaseUser firebaseUser = authResult.getUser();
+                if (firebaseUser != null) {
+                    String userId = firebaseUser.getUid();
+                    String mobile = firebaseUser.getPhoneNumber();
+                    
+                    // Check if user exists
+                    firestore.collection("users").document(userId).get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (!documentSnapshot.exists()) {
+                                // New User via Phone
+                                Map<String, Object> userData = new HashMap<>();
+                                userData.put("mobile", mobile != null ? mobile : "");
+                                userData.put("role", "admin");
+                                userData.put("familyId", userId);
+                                userData.put("createdAt", System.currentTimeMillis());
+                                userData.put("updatedAt", System.currentTimeMillis());
+                                
+                                firestore.collection("users").document(userId).set(userData)
+                                    .addOnSuccessListener(aVoid -> {
+                                        saveUserSession(userId, userId, "admin", "User", mobile);
+                                        listener.onAuthSuccess(userId);
+                                    });
+                            } else {
+                                // Existing User
+                                String familyId = documentSnapshot.getString("familyId");
+                                String role = documentSnapshot.getString("role");
+                                String name = documentSnapshot.getString("name");
+                                
+                                if (familyId == null) familyId = userId;
+                                saveUserSession(userId, familyId, role, name, mobile);
+                                listener.onAuthSuccess(userId);
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // Recovery
+                            saveUserSession(userId, userId, "user", "User", mobile);
+                            listener.onAuthSuccess(userId);
+                        });
+                } else {
+                    listener.onAuthFailure("Phone Auth Failed");
+                }
+            })
+            .addOnFailureListener(e -> listener.onAuthFailure(e.getMessage()));
+    }
+
+    public void updateUserName(String userId, String name, OnAuthListener listener) {
+        firestore.collection("users").document(userId)
+            .update("name", name)
+            .addOnSuccessListener(aVoid -> {
+                // Update local session
+                prefs.edit().putString("user_name", name).apply();
+                listener.onAuthSuccess(userId);
+            })
+            .addOnFailureListener(e -> listener.onAuthFailure(e.getMessage()));
     }
 }
