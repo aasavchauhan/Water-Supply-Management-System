@@ -41,9 +41,13 @@
 
 | Dashboard & Stats | Farmer Profiles | Smart Billing |
 |:---:|:---:|:---:|
-| <div style="width: 200px; height: 400px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 12px;">*Dashboard<br>(Add Screenshot)*</div> | <div style="width: 200px; height: 400px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 12px;">*Detailed Profile<br>(Add Screenshot)*</div> | <div style="width: 200px; height: 400px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 12px;">*Meter/Time Billing<br>(Add Screenshot)*</div> |
+| <img src="docs/screenshots/Dashboard.png" height="400" alt="Dashboard" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> | <img src="docs/screenshots/Detailed%20Profile.png" height="400" alt="Profile" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> | <img src="docs/screenshots/Billing.png" height="400" alt="Billing" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> |
+| **Payment Collection** | **Reports & Analytics** | **Login / Sign Up** |
+| <img src="docs/screenshots/Payment.png" height="400" alt="Payment" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> | <img src="docs/screenshots/ReportsAnalyics.png" height="400" alt="Reports & Analytics" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> | <img src="docs/screenshots/Login.png" height="400" alt="Login" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> |
+| **PDF Exports** | **Supplies List** | **Settings** |
+| <img src="docs/screenshots/PdfExport.png" height="400" alt="PDF Export" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> | <img src="docs/screenshots/Supplies.png" height="400" alt="Supplies" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> | <img src="docs/screenshots/Settings.png" height="400" alt="Settings" style="border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"> |
 
-> **Note**: Add your screenshots to `docs/screenshots/` and update the paths above to showcase the UI.
+> **Note**: These screenshots demonstrate the live field experience.
 
 ---
 
