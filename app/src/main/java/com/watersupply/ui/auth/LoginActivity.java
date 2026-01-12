@@ -67,6 +67,11 @@ public class LoginActivity extends AppCompatActivity {
         setupGoogleSignIn();
         setupClickListeners();
         setupToggle();
+        
+        // Initialize UI state for Mobile (default)
+        binding.tilEmail.setVisibility(View.GONE);
+        binding.tilPin.setVisibility(View.GONE);
+        binding.btnLogin.setText(getString(R.string.send_otp));
     }
     
     private void setupGoogleSignIn() {
