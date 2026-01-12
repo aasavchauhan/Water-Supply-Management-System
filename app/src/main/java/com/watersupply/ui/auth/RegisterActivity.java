@@ -59,6 +59,12 @@ public class RegisterActivity extends AppCompatActivity {
         setupGoogleSignIn();
         setupClickListeners();
         setupToggle();
+        
+        // Initialize UI state for Mobile (default)
+        binding.tilEmail.setVisibility(View.GONE);
+        binding.tilPin.setVisibility(View.GONE);
+        binding.tilConfirmPin.setVisibility(View.GONE);
+        binding.btnRegister.setText(getString(R.string.send_otp));
     }
     
     private void setupGoogleSignIn() {
