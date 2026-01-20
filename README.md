@@ -15,6 +15,9 @@
     <a href="https://github.com/aasavchauhan/Water-Supply-Management-System/actions">
        <img src="https://img.shields.io/github/actions/workflow/status/aasavchauhan/Water-Supply-Management-System/build_release.yml?style=for-the-badge&logo=github&label=Build" alt="Build Status">
     </a>
+    <a href="https://github.com/sponsors/aasavchauhan">
+       <img src="https://img.shields.io/badge/Sponsor-Heart?style=for-the-badge&logo=github&logoColor=white&color=pink" alt="Sponsor">
+    </a>
   </p>
 
   <p>
