@@ -117,6 +117,14 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 
 ---
 
+## ⭐ Star History
+
+We appreciate every star! Here's how our repository has grown over time:
+
+<iframe style="width:100%;height:auto;min-width:600px;min-height:400px;" src="https://www.star-history.com/embed?secret=Z2hwX3RzT1NQaVdtSTU0bkZtcEhMcjF1VkFEWmFlMGdMMjRCVGZsNg==#aasavchauhan/Water-Supply-Management-System&type=date&legend=top-left" frameBorder="0"></iframe>
+
+---
+
 ## 📄 License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
