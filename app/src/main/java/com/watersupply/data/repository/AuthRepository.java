@@ -266,7 +266,7 @@ public class AuthRepository {
         signInWithPhoneCredential(credential, listener);
     }
     
-    private void signInWithPhoneCredential(com.google.firebase.auth.PhoneAuthCredential credential, OnAuthListener listener) {
+    public void signInWithPhoneCredential(com.google.firebase.auth.PhoneAuthCredential credential, OnAuthListener listener) {
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener(authResult -> {
                 FirebaseUser firebaseUser = authResult.getUser();
