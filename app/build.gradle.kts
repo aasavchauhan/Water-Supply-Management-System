@@ -64,9 +64,6 @@ dependencies {
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.compiler)
     
-    // Biometric Authentication
-    implementation(libs.biometric)
-    
     // SwipeRefreshLayout
     implementation(libs.swiperefreshlayout)
     

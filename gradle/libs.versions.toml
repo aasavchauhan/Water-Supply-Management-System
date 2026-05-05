@@ -11,7 +11,6 @@ constraintlayout = "2.1.4"
 navigation = "2.7.6"
 hilt = "2.50"
 glide = "4.16.0"
-biometric = "1.2.0-alpha05"
 swiperefreshlayout = "1.1.0"
 mpandroidchart = "v3.1.0"
 viewpager2 = "1.1.0"
@@ -45,9 +44,6 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 # Glide
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
-
-# Biometric
-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 
 # SwipeRefreshLayout
 swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
