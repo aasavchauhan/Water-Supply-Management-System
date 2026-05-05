@@ -263,18 +263,6 @@
                         android:visibility="gone"
                         android:layout_marginBottom="@dimen/spacing_md" />
 
-                    <!-- Biometric Login Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnBiometric"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/button_height_small"
-                        android:text="@string/biometric_login"
-                        android:textSize="14sp"
-                        app:icon="@drawable/ic_fingerprint"
-                        app:iconGravity="textStart"
-                        app:cornerRadius="@dimen/button_corner_radius"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

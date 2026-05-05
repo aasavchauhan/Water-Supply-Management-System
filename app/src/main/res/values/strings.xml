@@ -9,7 +9,6 @@
     <string name="login">Sign In</string>
     <string name="dont_have_account">Don\'t have an account?</string>
     <string name="register_now">Register Now</string>
-    <string name="biometric_login">Use Fingerprint</string>
     <string name="send_otp">Send OTP</string>
     <string name="enter_otp">Enter OTP</string>
     <string name="verify_otp">Verify &amp; Login</string>

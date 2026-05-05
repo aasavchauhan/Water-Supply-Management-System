@@ -17,7 +17,6 @@ public class User {
     private String role;
     private String familyId;
     private String pinHash;
-    private boolean biometricEnabled;
     @ServerTimestamp
     private Date createdAt;
     @ServerTimestamp
@@ -25,7 +24,6 @@ public class User {
     
     // Required empty constructor for Firestore
     public User() {
-        this.biometricEnabled = false;
         this.role = "user";
     }
     
@@ -91,14 +89,6 @@ public class User {
     
     public void setPinHash(String pinHash) {
         this.pinHash = pinHash;
-    }
-    
-    public boolean isBiometricEnabled() {
-        return biometricEnabled;
-    }
-    
-    public void setBiometricEnabled(boolean biometricEnabled) {
-        this.biometricEnabled = biometricEnabled;
     }
     
     public Date getCreatedAt() {
