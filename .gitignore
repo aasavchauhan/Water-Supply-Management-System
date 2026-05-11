@@ -20,3 +20,9 @@ google-services.json
 *.key
 .idea/
 /google-services.json
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+*.env
