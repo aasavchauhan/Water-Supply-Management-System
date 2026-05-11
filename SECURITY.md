@@ -27,7 +27,7 @@ If a secret is exposed:
 
 1. Rotate/revoke the secret immediately at the provider.
 2. Replace any affected credentials in all environments.
-3. Remove the secret from repository history (for example, with `git filter-repo` or BFG) and force-push cleaned history.
+3. Remove the secret from repository history (using `git filter-repo` or BFG) and force-push cleaned history.
 4. Invalidate active sessions/tokens and audit recent access.
 5. Enable and review GitHub secret scanning alerts for confirmation.
 
