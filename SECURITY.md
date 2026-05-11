@@ -33,3 +33,7 @@ If a secret is exposed:
 
 > ⚠️ History rewriting requires coordination with all contributors and can require team members to re-clone or hard-reset local repositories.
 > ⚠️ For public repositories, treat exposed secrets as permanently compromised even after deletion, because mirrors/caches may retain them.
+
+References:
+- git-filter-repo: https://github.com/newren/git-filter-repo
+- BFG Repo-Cleaner: https://rtyley.github.io/bfg-repo-cleaner/
