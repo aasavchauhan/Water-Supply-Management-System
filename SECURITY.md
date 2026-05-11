@@ -30,3 +30,6 @@ If a secret is exposed:
 3. Remove the secret from repository history (for example, with `git filter-repo` or BFG) and force-push cleaned history.
 4. Invalidate active sessions/tokens and audit recent access.
 5. Enable and review GitHub secret scanning alerts for confirmation.
+
+> ⚠️ History rewriting requires coordination with all contributors and can require team members to re-clone or hard-reset local repositories.
+> ⚠️ For public repositories, treat exposed secrets as permanently compromised even after deletion, because mirrors/caches may retain them.

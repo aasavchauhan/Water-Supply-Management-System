@@ -22,7 +22,7 @@ google-services.json
 /google-services.json
 
 # Local secrets and environment files
-.env
-.env.*
+.env*
 !.env.example
+# Also ignore alternate suffix style files such as production.env
 *.env
