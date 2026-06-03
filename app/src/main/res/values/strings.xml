@@ -84,5 +84,5 @@
 
     
     <!-- Auth Config (Placeholder - will be overridden by google-services plugin if valid JSON exists) -->
-    <!-- <string name="google_server_client_id">YOUR_WEB_CLIENT_ID</string> -->
+    <string name="default_web_client_id">294091400852-1hee428tu06815tdl15mgjo2p7u2a7le.apps.googleusercontent.com</string>
 </resources>
