@@ -213,6 +213,7 @@ public class ReportGenerator {
             String farmerName;
             double amount; 
             boolean isPayment;
+            boolean isSettled;
         }
         
         boolean isAllFarmers = "All Farmers".equals(farmerName);
@@ -240,6 +241,7 @@ public class ReportGenerator {
                     i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
                     i.amount = s.getAmount(); // Primitive, safe
                     i.isPayment = false;
+                    i.isSettled = "settled".equals(s.getSettlementStatus());
                     items.add(i);
                 }
             }
@@ -257,6 +259,7 @@ public class ReportGenerator {
                     i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
                     i.amount = p.getAmount(); // Primitive, safe
                     i.isPayment = true;
+                    i.isSettled = p.getSettlementId() != null;
                     items.add(i);
                 }
             }
@@ -348,6 +351,13 @@ public class ReportGenerator {
              
              if (!paymentRow) drawBadge(canvas, "Supply", c3, y + 8, badgeSupplyBg, badgeSupplyText);
              else drawBadge(canvas, "Payment", c3, y + 8, badgePaymentBg, badgePaymentText);
+             
+             if (item.isSettled) {
+                 paint.setColor(colorGreenText);
+                 paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                 canvas.drawText("✓", c3 + 60, y + 20, paint);
+                 paint.setTypeface(Typeface.DEFAULT);
+             }
              
              if (paymentRow) paint.setColor(colorGreenText);
              else paint.setColor(colorDarkGray);

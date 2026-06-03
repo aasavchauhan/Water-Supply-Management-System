@@ -44,25 +44,36 @@ public class PaymentDetailDialog extends BottomSheetDialogFragment {
         
         binding.btnEdit.setOnClickListener(v -> {
             if (currentPayment != null) {
-                android.content.Intent intent = new android.content.Intent(requireContext(), AddPaymentActivity.class);
-                intent.putExtra("payment", currentPayment);
-                startActivity(intent);
-                dismiss();
+                if (currentPayment.getSettlementId() != null) {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Warning: Settled Payment")
+                        .setMessage("This payment is already settled. Editing it might affect the farmer's current balance. Do you want to proceed?")
+                        .setPositiveButton("Proceed", (dialog, which) -> launchEditActivity())
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                } else {
+                    launchEditActivity();
+                }
             }
         });
         
         binding.btnDelete.setOnClickListener(v -> {
             if (currentPayment != null) {
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Delete Payment")
-                    .setMessage("Are you sure you want to delete this payment? This will revert the farmer's balance.")
-                    .setPositiveButton("Delete", (dialog, which) -> {
-                        paymentRepository.deletePayment(currentPayment);
-                        android.widget.Toast.makeText(requireContext(), "Payment deleted", android.widget.Toast.LENGTH_SHORT).show();
-                        dismiss();
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
+                if (currentPayment.getSettlementId() != null) {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Warning: Settled Payment")
+                        .setMessage("This payment is already settled. Deleting it might affect the farmer's current balance. Do you want to proceed?")
+                        .setPositiveButton("Delete", (dialog, which) -> performDelete())
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                } else {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Delete Payment")
+                        .setMessage("Are you sure you want to delete this payment? This will revert the farmer's balance.")
+                        .setPositiveButton("Delete", (dialog, which) -> performDelete())
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                }
             }
         });
         
@@ -78,6 +89,19 @@ public class PaymentDetailDialog extends BottomSheetDialogFragment {
     }
     
     private Payment currentPayment;
+
+    private void launchEditActivity() {
+        android.content.Intent intent = new android.content.Intent(requireContext(), AddPaymentActivity.class);
+        intent.putExtra("payment", currentPayment);
+        startActivity(intent);
+        dismiss();
+    }
+
+    private void performDelete() {
+        paymentRepository.deletePayment(currentPayment);
+        android.widget.Toast.makeText(requireContext(), "Payment deleted", android.widget.Toast.LENGTH_SHORT).show();
+        dismiss();
+    }
 
     private void displayPaymentDetails(Payment payment) {
         this.currentPayment = payment;

@@ -34,12 +34,16 @@ public class SupplyDetailDialog extends BottomSheetDialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Hilt injection is handled by @AndroidEntryPoint annotation on class
+        if (getArguments() != null) {
+            entry = (SupplyEntry) getArguments().getSerializable("supply_entry");
+        }
     }
     
     public static SupplyDetailDialog newInstance(SupplyEntry entry) {
         SupplyDetailDialog dialog = new SupplyDetailDialog();
-        dialog.entry = entry;
+        Bundle args = new Bundle();
+        args.putSerializable("supply_entry", entry);
+        dialog.setArguments(args);
         return dialog;
     }
     
@@ -58,35 +62,53 @@ public class SupplyDetailDialog extends BottomSheetDialogFragment {
             displayEntryDetails();
         }
         
-        // TODO: Implement edit functionality
         binding.btnEdit.setOnClickListener(v -> {
             if (entry != null) {
-                android.content.Intent intent = new android.content.Intent(requireContext(), NewSupplyActivity.class);
-                intent.putExtra("supply_entry", entry);
-                startActivity(intent);
-                dismiss();
+                if ("settled".equals(entry.getSettlementStatus())) {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Warning: Settled Entry")
+                        .setMessage("This entry is already settled. Editing it might affect the farmer's current balance. Do you want to proceed?")
+                        .setPositiveButton("Proceed", (dialog, which) -> launchEditActivity())
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                } else {
+                    launchEditActivity();
+                }
             }
         });
         
         binding.btnDelete.setOnClickListener(v -> {
             if (entry != null) {
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Delete Supply Entry")
-                    .setMessage("Are you sure you want to delete this supply entry? This will revert the farmer's balance.")
-                    .setPositiveButton("Delete", (dialog, which) -> {
-                        // We need a way to call delete. 
-                        // Since this is a DialogFragment, we should probably use a ViewModel or interface.
-                        // For simplicity in this refactor, we can get the Repository from EntryPoint or ViewModel.
-                        // Let's use the ViewModel associated with the parent activity or a new one.
-                        // Actually, let's inject the repository here like in PaymentDetailDialog.
-                        supplyRepository.deleteSupplyEntry(entry);
-                        android.widget.Toast.makeText(requireContext(), "Supply entry deleted", android.widget.Toast.LENGTH_SHORT).show();
-                        dismiss();
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
+                if ("settled".equals(entry.getSettlementStatus())) {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Warning: Settled Entry")
+                        .setMessage("This entry is already settled. Deleting it might affect the farmer's current balance. Do you want to proceed?")
+                        .setPositiveButton("Delete", (dialog, which) -> performDelete())
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                } else {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Delete Supply Entry")
+                        .setMessage("Are you sure you want to delete this supply entry? This will revert the farmer's balance.")
+                        .setPositiveButton("Delete", (dialog, which) -> performDelete())
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                }
             }
         });
+    }
+
+    private void launchEditActivity() {
+        android.content.Intent intent = new android.content.Intent(requireContext(), NewSupplyActivity.class);
+        intent.putExtra("supply_entry", entry);
+        startActivity(intent);
+        dismiss();
+    }
+
+    private void performDelete() {
+        supplyRepository.deleteSupplyEntry(entry);
+        android.widget.Toast.makeText(requireContext(), "Supply entry deleted", android.widget.Toast.LENGTH_SHORT).show();
+        dismiss();
     }
     
     private void displayEntryDetails() {

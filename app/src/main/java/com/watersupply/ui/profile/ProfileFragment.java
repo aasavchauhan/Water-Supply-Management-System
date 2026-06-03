@@ -174,7 +174,7 @@ public class ProfileFragment extends Fragment {
         java.util.Map<String, Object> updates = new java.util.HashMap<>();
         updates.put("name", name);
         updates.put("mobile", mobile);
-        updates.put("updatedAt", System.currentTimeMillis());
+        updates.put("updatedAt", new java.util.Date());
         
         // Update Firestore direct (we could use Repository but direct is fine for simple update)
         // Ideally we should add updateProfile to AuthRepository

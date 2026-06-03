@@ -100,6 +100,29 @@ public class PaymentAdapter extends ListAdapter<Payment, PaymentAdapter.ViewHold
                 binding.tvTransactionId.setVisibility(android.view.View.GONE);
             }
             
+            // Settlement status badge & visual styling for settled vs unsettled
+            if (payment.getSettlementId() != null) {
+                binding.tvSettlementBadge.setVisibility(android.view.View.VISIBLE);
+                binding.cardPayment.setCardBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(
+                        binding.getRoot().getContext(), com.watersupply.R.color.neutral_50));
+                binding.cardPayment.setStrokeWidth(2);
+                binding.cardPayment.setStrokeColor(
+                    androidx.core.content.ContextCompat.getColor(
+                        binding.getRoot().getContext(), com.watersupply.R.color.neutral_200));
+                binding.cardPayment.setCardElevation(0);
+                binding.getRoot().setAlpha(0.7f);
+            } else {
+                binding.tvSettlementBadge.setVisibility(android.view.View.GONE);
+                binding.cardPayment.setCardBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(
+                        binding.getRoot().getContext(), com.watersupply.R.color.white));
+                binding.cardPayment.setStrokeWidth(0);
+                binding.cardPayment.setCardElevation(2);
+                binding.getRoot().setAlpha(1.0f);
+            }
+
+            
             // Card click - show detail dialog
             binding.cardPayment.setOnClickListener(v -> listener.onPaymentClick(payment));
         }

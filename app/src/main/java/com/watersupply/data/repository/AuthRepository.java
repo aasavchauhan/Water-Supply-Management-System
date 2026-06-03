@@ -49,8 +49,8 @@ public class AuthRepository {
                     userData.put("mobile", mobile);
                     userData.put("role", "admin"); // Default to admin (own family)
                     userData.put("familyId", userId); // Default to own ID
-                    userData.put("createdAt", System.currentTimeMillis());
-                    userData.put("updatedAt", System.currentTimeMillis());
+                    userData.put("createdAt", new java.util.Date());
+                    userData.put("updatedAt", new java.util.Date());
                     
                     firestore.collection("users").document(userId)
                         .set(userData)
@@ -147,8 +147,8 @@ public class AuthRepository {
                                 userData.put("mobile", phone != null ? phone : "");
                                 userData.put("role", "admin");
                                 userData.put("familyId", userId);
-                                userData.put("createdAt", System.currentTimeMillis());
-                                userData.put("updatedAt", System.currentTimeMillis());
+                                userData.put("createdAt", new java.util.Date());
+                                userData.put("updatedAt", new java.util.Date());
                                 
                                 firestore.collection("users").document(userId).set(userData)
                                     .addOnSuccessListener(aVoid -> {
@@ -283,8 +283,8 @@ public class AuthRepository {
                                 userData.put("mobile", mobile != null ? mobile : "");
                                 userData.put("role", "admin");
                                 userData.put("familyId", userId);
-                                userData.put("createdAt", System.currentTimeMillis());
-                                userData.put("updatedAt", System.currentTimeMillis());
+                                userData.put("createdAt", new java.util.Date());
+                                userData.put("updatedAt", new java.util.Date());
                                 
                                 firestore.collection("users").document(userId).set(userData)
                                     .addOnSuccessListener(aVoid -> {

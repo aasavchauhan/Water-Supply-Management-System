@@ -29,7 +29,7 @@ public class WaterSupplyApplication extends Application {
         firestore.setFirestoreSettings(settings);
         
         // Apply saved theme preference
-        ThemePreference themePreference = new ThemePreference(this);
-        themePreference.applyTheme();
+        // ThemePreference themePreference = new ThemePreference(this);
+        // themePreference.applyTheme();
     }
 }

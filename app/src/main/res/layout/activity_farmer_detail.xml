@@ -208,6 +208,21 @@
                     </LinearLayout>
                     
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSettleAccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Settle Account"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:icon="@drawable/ic_payment"
+                        app:iconGravity="textStart"
+                        app:cornerRadius="12dp"
+                        android:layout_marginTop="24dp"
+                        app:backgroundTint="@color/brand_secondary"
+                        android:textColor="@color/white"
+                        app:iconTint="@color/white" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnRecordPayment"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
@@ -217,7 +232,7 @@
                         app:icon="@drawable/ic_money"
                         app:iconGravity="textStart"
                         app:cornerRadius="12dp"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="8dp"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:textColor="@color/brand_primary"
                         app:backgroundTint="@color/brand_primary_light"
@@ -352,6 +367,60 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="No payments recorded yet"
+                    android:textSize="16sp"
+                    android:textColor="@color/neutral_500"
+                    android:gravity="center" />
+            </LinearLayout>
+            
+            <!-- Settlement History Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Settlement History"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/neutral_900" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSettlements"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp" />
+
+            <LinearLayout
+                android:id="@+id/llNoSettlements"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_payment"
+                    app:tint="@color/neutral_300"
+                    android:contentDescription="No settlements"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No settlements yet"
                     android:textSize="16sp"
                     android:textColor="@color/neutral_500"
                     android:gravity="center" />
