@@ -208,7 +208,6 @@ public class ReportsFragment extends Fragment {
     private void showReportFormatDialog() {
         com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
         builder.setTitle("Select Report Format");
-        builder.setBackground(androidx.core.content.ContextCompat.getDrawable(requireContext(), android.R.drawable.dialog_holo_light_frame)); // Optional
         
         // Custom View
         android.widget.LinearLayout layout = new android.widget.LinearLayout(requireContext());
@@ -301,7 +300,8 @@ public class ReportsFragment extends Fragment {
         }
         
         try {
-            File file = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Report_" + farmerName + ".csv");
+            String safeName = farmerName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            File file = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Report_" + safeName + ".csv");
             FileOutputStream out = new FileOutputStream(file);
             out.write(csvData.toString().getBytes());
             out.close();
@@ -374,6 +374,8 @@ public class ReportsFragment extends Fragment {
                 y = 50;
             }
             
+            String typeStr = "Supply" + ("settled".equals(entry.getSettlementStatus()) ? " ✓" : "");
+            
             if (isAllFarmers) {
                 canvas.drawText(entry.getDate(), 50, y, paint);
                 
@@ -385,12 +387,12 @@ public class ReportsFragment extends Fragment {
                 
                 if (fName.length() > 12) fName = fName.substring(0, 10) + ".."; // Truncate
                 canvas.drawText(fName, 130, y, paint);
-                canvas.drawText("Supply", 230, y, paint);
+                canvas.drawText(typeStr, 230, y, paint);
                 canvas.drawText(String.format("%.1f hrs", entry.getTotalTimeUsed()), 300, y, paint);
                 canvas.drawText(String.format("₹%.2f", entry.getAmount()), 480, y, paint);
             } else {
                 canvas.drawText(entry.getDate(), 50, y, paint);
-                canvas.drawText("Supply", 150, y, paint);
+                canvas.drawText(typeStr, 150, y, paint);
                 canvas.drawText(String.format("%.1f hrs", entry.getTotalTimeUsed()), 250, y, paint);
                 canvas.drawText(String.format("₹%.2f", entry.getAmount()), 450, y, paint);
             }
@@ -406,6 +408,8 @@ public class ReportsFragment extends Fragment {
                     y = 50;
                 }
                 
+                String typeStr = "Payment" + (payment.getSettlementId() != null ? " ✓" : "");
+                
                 if (isAllFarmers) {
                     canvas.drawText(payment.getPaymentDate(), 50, y, paint);
                     
@@ -417,12 +421,12 @@ public class ReportsFragment extends Fragment {
                     if (fName.length() > 12) fName = fName.substring(0, 10) + ".."; // Truncate
                     
                     canvas.drawText(fName, 130, y, paint); 
-                    canvas.drawText("Payment", 230, y, paint);
+                    canvas.drawText(typeStr, 230, y, paint);
                     canvas.drawText(payment.getPaymentMethod(), 300, y, paint);
                     canvas.drawText(String.format("-₹%.2f", payment.getAmount()), 480, y, paint);
                 } else {
                     canvas.drawText(payment.getPaymentDate(), 50, y, paint);
-                    canvas.drawText("Payment", 150, y, paint);
+                    canvas.drawText(typeStr, 150, y, paint);
                     canvas.drawText(payment.getPaymentMethod(), 250, y, paint);
                     canvas.drawText(String.format("-₹%.2f", payment.getAmount()), 450, y, paint);
                 }
@@ -433,8 +437,9 @@ public class ReportsFragment extends Fragment {
         document.finishPage(page);
 
         // Save File
-        File file = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Report_" + farmerName + ".pdf");
         try {
+            String safeName = farmerName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            File file = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Report_" + safeName + ".pdf");
             document.writeTo(new FileOutputStream(file));
             Toast.makeText(requireContext(), "Report saved to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
             openPdf(file);

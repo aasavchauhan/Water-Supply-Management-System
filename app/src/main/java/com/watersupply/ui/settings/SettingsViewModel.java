@@ -3,6 +3,7 @@ package com.watersupply.ui.settings;
 import android.content.Context;
 import android.os.Environment;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import com.watersupply.data.models.AppSettings;
@@ -38,7 +39,7 @@ public class SettingsViewModel extends ViewModel {
     private final PaymentRepository paymentRepository;
     private final AppSettingsRepository appSettingsRepository;
     
-    private final MutableLiveData<DatabaseStats> databaseStats = new MutableLiveData<>();
+    private final MediatorLiveData<DatabaseStats> databaseStats = new MediatorLiveData<>();
     private final MutableLiveData<String> statusMessage = new MutableLiveData<>();
     
     @Inject
@@ -86,25 +87,31 @@ public class SettingsViewModel extends ViewModel {
     private void loadDatabaseStats() {
         String userId = authRepository.getCurrentUserId();
         if (userId != null) {
-            // Get counts from repositories
-            farmerRepository.getFarmerCount(userId).observeForever(farmerCount -> {
+            LiveData<Integer> farmerCountSrc = farmerRepository.getFarmerCount(userId);
+            LiveData<Integer> supplyCountSrc = supplyRepository.getSupplyEntryCount(userId);
+            LiveData<Integer> paymentCountSrc = paymentRepository.getPaymentCount(userId);
+
+            DatabaseStats statsObj = new DatabaseStats();
+            databaseStats.setValue(statsObj);
+
+            databaseStats.addSource(farmerCountSrc, count -> {
                 DatabaseStats stats = databaseStats.getValue();
                 if (stats == null) stats = new DatabaseStats();
-                stats.farmerCount = farmerCount != null ? farmerCount : 0;
+                stats.farmerCount = count != null ? count : 0;
                 databaseStats.setValue(stats);
             });
-            
-            supplyRepository.getSupplyEntryCount(userId).observeForever(supplyCount -> {
+
+            databaseStats.addSource(supplyCountSrc, count -> {
                 DatabaseStats stats = databaseStats.getValue();
                 if (stats == null) stats = new DatabaseStats();
-                stats.supplyCount = supplyCount != null ? supplyCount : 0;
+                stats.supplyCount = count != null ? count : 0;
                 databaseStats.setValue(stats);
             });
-            
-            paymentRepository.getPaymentCount(userId).observeForever(paymentCount -> {
+
+            databaseStats.addSource(paymentCountSrc, count -> {
                 DatabaseStats stats = databaseStats.getValue();
                 if (stats == null) stats = new DatabaseStats();
-                stats.paymentCount = paymentCount != null ? paymentCount : 0;
+                stats.paymentCount = count != null ? count : 0;
                 databaseStats.setValue(stats);
             });
         }

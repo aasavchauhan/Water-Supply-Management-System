@@ -26,6 +26,7 @@ public class Payment implements Serializable {
     private Date createdAt;
     @ServerTimestamp
     private Date updatedAt;
+    private String settlementId; // null = standalone, non-null = part of settlement
     
     // Required empty constructor for Firestore
     public Payment() {
@@ -133,5 +134,13 @@ public class Payment implements Serializable {
     
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getSettlementId() {
+        return settlementId;
+    }
+
+    public void setSettlementId(String settlementId) {
+        this.settlementId = settlementId;
     }
 }

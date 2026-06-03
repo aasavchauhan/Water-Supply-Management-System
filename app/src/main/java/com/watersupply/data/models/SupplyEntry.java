@@ -34,6 +34,8 @@ public class SupplyEntry implements Serializable {
     @ServerTimestamp
     private Date updatedAt;
     private String status; // "completed" or "draft"
+    private String settlementStatus; // "unsettled" (default) or "settled"
+    private String settlementId;     // links to Settlement that settled this entry
     
     // Required empty constructor for Firestore
     public SupplyEntry() {
@@ -206,5 +208,21 @@ public class SupplyEntry implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getSettlementStatus() {
+        return settlementStatus != null ? settlementStatus : "unsettled";
+    }
+
+    public void setSettlementStatus(String settlementStatus) {
+        this.settlementStatus = settlementStatus;
+    }
+
+    public String getSettlementId() {
+        return settlementId;
+    }
+
+    public void setSettlementId(String settlementId) {
+        this.settlementId = settlementId;
     }
 }

@@ -10,10 +10,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.data.models.Payment;
+import com.watersupply.data.models.Settlement;
 import com.watersupply.data.repository.FarmerRepository;
 import com.watersupply.databinding.ActivityFarmerDetailBinding;
 import com.watersupply.ui.supply.NewSupplyActivity;
 import com.watersupply.ui.payments.AddPaymentActivity;
+import com.watersupply.ui.settlement.SettlementActivity;
+import com.watersupply.ui.settlement.SettlementAdapter;
 import com.watersupply.ui.supply.SupplyEntryAdapter;
 import com.watersupply.ui.payments.adapters.PaymentAdapter;
 import com.watersupply.ui.supply.SupplyDetailDialog;
@@ -34,6 +37,7 @@ public class FarmerDetailActivity extends AppCompatActivity {
     private String farmerId;
     private SupplyEntryAdapter supplyAdapter;
     private PaymentAdapter paymentAdapter;
+    private SettlementAdapter settlementAdapter;
     
     @Inject
     FarmerRepository farmerRepository;
@@ -58,6 +62,7 @@ public class FarmerDetailActivity extends AppCompatActivity {
         observeFarmerDetails();
         observeSupplyEntries();
         observePayments();
+        observeSettlements();
     }
     
     private void setupToolbar() {
@@ -94,11 +99,27 @@ public class FarmerDetailActivity extends AppCompatActivity {
         
         binding.rvPayments.setLayoutManager(new LinearLayoutManager(this));
         binding.rvPayments.setAdapter(paymentAdapter);
+        
+        // Settlements
+        settlementAdapter = new SettlementAdapter(settlement -> {
+            // Show settlement details (could open detail dialog/activity)
+            showSettlementDetail(settlement);
+        });
+        settlementAdapter.setDetailMode(true);
+        
+        binding.rvSettlements.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvSettlements.setAdapter(settlementAdapter);
     }
     
     private void setupButtons() {
         binding.fabNewSupply.setOnClickListener(v -> {
             Intent intent = new Intent(this, NewSupplyActivity.class);
+            intent.putExtra("farmer_id", farmerId);
+            startActivity(intent);
+        });
+        
+        binding.btnSettleAccount.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SettlementActivity.class);
             intent.putExtra("farmer_id", farmerId);
             startActivity(intent);
         });
@@ -152,6 +173,15 @@ public class FarmerDetailActivity extends AppCompatActivity {
                 } else {
                     binding.tvBalanceWarning.setVisibility(View.GONE);
                 }
+                
+                // Enable/disable settle button based on balance
+                if (farmer.getBalance() <= 0) {
+                    binding.btnSettleAccount.setEnabled(false);
+                    binding.btnSettleAccount.setAlpha(0.5f);
+                } else {
+                    binding.btnSettleAccount.setEnabled(true);
+                    binding.btnSettleAccount.setAlpha(1.0f);
+                }
             }
         });
     }
@@ -181,6 +211,70 @@ public class FarmerDetailActivity extends AppCompatActivity {
             }
         });
     }
+    
+    private void observeSettlements() {
+        viewModel.getSettlements(farmerId).observe(this, settlements -> {
+            if (settlements == null || settlements.isEmpty()) {
+                binding.llNoSettlements.setVisibility(View.VISIBLE);
+                binding.rvSettlements.setVisibility(View.GONE);
+            } else {
+                binding.llNoSettlements.setVisibility(View.GONE);
+                binding.rvSettlements.setVisibility(View.VISIBLE);
+                // Sort by date descending
+                java.util.Collections.sort(settlements, (s1, s2) -> {
+                    if (s1.getSettlementDate() == null) return 1;
+                    if (s2.getSettlementDate() == null) return -1;
+                    return s2.getSettlementDate().compareTo(s1.getSettlementDate());
+                });
+                settlementAdapter.submitList(settlements);
+            }
+        });
+    }
+    
+    private void showSettlementDetail(Settlement settlement) {
+        String message = String.format(
+            "Date: %s\n\nOutstanding: %s\nAmount Paid: %s\nAdjustment: %s (%s)\n\nPayment Method: %s\nEntries Settled: %d\n\n%s",
+            com.watersupply.utils.DateFormatter.format(settlement.getSettlementDate()),
+            CurrencyFormatter.format(settlement.getOutstandingAmount()),
+            CurrencyFormatter.format(settlement.getAmountReceived()),
+            CurrencyFormatter.format(settlement.getAdjustmentAmount()),
+            settlement.getAdjustmentType() != null ? settlement.getAdjustmentType() : "N/A",
+            settlement.getPaymentMethod() != null ? settlement.getPaymentMethod() : "N/A",
+            settlement.getSettledSupplyIds() != null ? settlement.getSettledSupplyIds().size() : 0,
+            settlement.getRemarks() != null ? "Remarks: " + settlement.getRemarks() : ""
+        );
+
+        new AlertDialog.Builder(this)
+            .setTitle("Settlement Details")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNegativeButton("Delete", (dialog, which) -> {
+                showDeleteSettlementConfirmation(settlement);
+            })
+            .show();
+    }
+
+    private void showDeleteSettlementConfirmation(Settlement settlement) {
+        new AlertDialog.Builder(this)
+            .setTitle("Delete Settlement")
+            .setMessage("Are you sure you want to delete this settlement? This will mark settled supply entries back as unsettled, delete/unlink associated payments, and restore the farmer's balance.")
+            .setPositiveButton("Delete", (dialog, which) -> {
+                viewModel.deleteSettlement(settlement, new com.watersupply.data.repository.SettlementRepository.OnCompleteListener() {
+                    @Override
+                    public void onSuccess(String settlementId) {
+                        Toast.makeText(FarmerDetailActivity.this, "Settlement deleted successfully", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        Toast.makeText(FarmerDetailActivity.this, "Failed to delete settlement: " + error, Toast.LENGTH_LONG).show();
+                    }
+                });
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
     
     private void showDeleteConfirmation() {
         new AlertDialog.Builder(this)

@@ -121,6 +121,29 @@ public class SupplyEntryAdapter extends ListAdapter<SupplyEntry, SupplyEntryAdap
             
             binding.tvAmount.setText(CurrencyFormatter.format(entry.getAmount()));
             
+            // Settlement status badge & visual styling for settled vs unsettled
+            if ("settled".equals(entry.getSettlementStatus())) {
+                binding.tvSettlementBadge.setVisibility(android.view.View.VISIBLE);
+                binding.cardSupplyEntry.setCardBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(
+                        binding.getRoot().getContext(), com.watersupply.R.color.neutral_50));
+                binding.cardSupplyEntry.setStrokeWidth(2);
+                binding.cardSupplyEntry.setStrokeColor(
+                    androidx.core.content.ContextCompat.getColor(
+                        binding.getRoot().getContext(), com.watersupply.R.color.neutral_200));
+                binding.cardSupplyEntry.setCardElevation(0);
+                binding.getRoot().setAlpha(0.7f);
+            } else {
+                binding.tvSettlementBadge.setVisibility(android.view.View.GONE);
+                binding.cardSupplyEntry.setCardBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(
+                        binding.getRoot().getContext(), com.watersupply.R.color.white));
+                binding.cardSupplyEntry.setStrokeWidth(0);
+                binding.cardSupplyEntry.setCardElevation(2);
+                binding.getRoot().setAlpha(1.0f);
+            }
+
+            
             // Card click - show detail dialog
             binding.cardSupplyEntry.setOnClickListener(v -> {
                 if (listener != null) {

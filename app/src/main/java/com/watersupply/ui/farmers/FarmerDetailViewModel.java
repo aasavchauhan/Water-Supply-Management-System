@@ -4,9 +4,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 import com.watersupply.data.models.Farmer;
 import com.watersupply.data.models.Payment;
+import com.watersupply.data.models.Settlement;
 import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.data.repository.FarmerRepository;
 import com.watersupply.data.repository.PaymentRepository;
+import com.watersupply.data.repository.SettlementRepository;
 import com.watersupply.data.repository.SupplyRepository;
 import com.watersupply.data.repository.AuthRepository;
 import java.util.List;
@@ -18,6 +20,7 @@ public class FarmerDetailViewModel extends ViewModel {
     private final FarmerRepository farmerRepository;
     private final SupplyRepository supplyRepository;
     private final PaymentRepository paymentRepository;
+    private final SettlementRepository settlementRepository;
     private final AuthRepository authRepository;
     private final String familyId;
     
@@ -26,11 +29,13 @@ public class FarmerDetailViewModel extends ViewModel {
         FarmerRepository farmerRepository,
         SupplyRepository supplyRepository,
         PaymentRepository paymentRepository,
+        SettlementRepository settlementRepository,
         AuthRepository authRepository
     ) {
         this.farmerRepository = farmerRepository;
         this.supplyRepository = supplyRepository;
         this.paymentRepository = paymentRepository;
+        this.settlementRepository = settlementRepository;
         this.authRepository = authRepository;
         this.familyId = authRepository.getCurrentFamilyId();
     }
@@ -70,6 +75,10 @@ public class FarmerDetailViewModel extends ViewModel {
         });
     }
     
+    public LiveData<List<Settlement>> getSettlements(String farmerId) {
+        return settlementRepository.getSettlementsByFarmer(familyId, farmerId);
+    }
+    
     public void deleteFarmer(String farmerId) {
         farmerRepository.deleteFarmer(farmerId, new FarmerRepository.OnCompleteListener() {
             @Override
@@ -83,4 +92,10 @@ public class FarmerDetailViewModel extends ViewModel {
             }
         });
     }
+
+    public void deleteSettlement(Settlement settlement, SettlementRepository.OnCompleteListener listener) {
+        settlementRepository.deleteSettlement(settlement, listener);
+    }
 }
+
+

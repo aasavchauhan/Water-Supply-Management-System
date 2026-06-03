@@ -97,6 +97,20 @@
                     android:paddingVertical="2dp"
                     android:layout_marginTop="4dp"
                     android:layout_gravity="end" />
+
+                <TextView
+                    android:id="@+id/tvSettlementBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✓ Settled"
+                    android:textSize="10sp"
+                    android:textColor="@color/success"
+                    android:background="@drawable/bg_badge_success"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_gravity="end"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
         

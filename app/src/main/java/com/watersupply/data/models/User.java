@@ -18,9 +18,9 @@ public class User {
     private String familyId;
     private String pinHash;
     @ServerTimestamp
-    private Date createdAt;
+    private Object createdAt;
     @ServerTimestamp
-    private Date updatedAt;
+    private Object updatedAt;
     
     // Required empty constructor for Firestore
     public User() {
@@ -92,18 +92,38 @@ public class User {
     }
     
     public Date getCreatedAt() {
-        return createdAt;
+        if (createdAt == null) return null;
+        if (createdAt instanceof Date) {
+            return (Date) createdAt;
+        } else if (createdAt instanceof com.google.firebase.Timestamp) {
+            return ((com.google.firebase.Timestamp) createdAt).toDate();
+        } else if (createdAt instanceof Long) {
+            return new Date((Long) createdAt);
+        } else if (createdAt instanceof Double) {
+            return new Date(((Double) createdAt).longValue());
+        }
+        return null;
     }
     
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Object createdAt) {
         this.createdAt = createdAt;
     }
     
     public Date getUpdatedAt() {
-        return updatedAt;
+        if (updatedAt == null) return null;
+        if (updatedAt instanceof Date) {
+            return (Date) updatedAt;
+        } else if (updatedAt instanceof com.google.firebase.Timestamp) {
+            return ((com.google.firebase.Timestamp) updatedAt).toDate();
+        } else if (updatedAt instanceof Long) {
+            return new Date((Long) updatedAt);
+        } else if (updatedAt instanceof Double) {
+            return new Date(((Double) updatedAt).longValue());
+        }
+        return null;
     }
     
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Object updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

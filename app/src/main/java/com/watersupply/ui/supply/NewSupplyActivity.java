@@ -358,7 +358,12 @@ public class NewSupplyActivity extends AppCompatActivity {
         
         SupplyEntry entry = isEditMode ? editingEntry : new SupplyEntry();
         
-        if (!isEditMode) {
+        if (isEditMode) {
+            entry.setFarmerId(farmerId);
+            if (selectedFarmerName != null) {
+                entry.setFarmerName(selectedFarmerName);
+            }
+        } else {
             entry.setUserId(userId);
             entry.setFamilyId(familyId);
             entry.setFarmerId(farmerId);

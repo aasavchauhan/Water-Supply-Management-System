@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is accessing their own family data
+    function isFamilyMember(familyId) {
+      return isAuthenticated() && 
+             (request.auth.uid == familyId || 
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.familyId == familyId);
+    }
+
+    // Users: authenticated users can read, and write their own profile
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Farmers collection
+    match /farmers/{farmerId} {
+      allow read: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid // Allow legacy owner access
+      );
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+    }
+    
+    // Supply Entries collection
+    match /supply_entries/{entryId} {
+      allow read: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+    }
+    
+    // Payments collection
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+    }
+    
+    // Settlements collection
+    match /settlements/{settlementId} {
+      allow read: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        (resource.data.familyId == request.auth.uid || isFamilyMember(resource.data.familyId)) ||
+        resource.data.userId == request.auth.uid
+      );
+    }
+    
+    // Settings: authenticated users can read/write their own settings
+    match /settings/{settingId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == settingId;
+    }
+  }
+}
