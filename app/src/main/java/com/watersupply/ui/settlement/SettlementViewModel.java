@@ -11,6 +11,7 @@ import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.data.repository.AuthRepository;
 import com.watersupply.data.repository.FarmerRepository;
 import com.watersupply.data.repository.SettlementRepository;
+import com.watersupply.utils.BillingCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class SettlementViewModel extends ViewModel {
                     unsettledEntries.setValue(entries);
                     double charges = 0;
                     for (SupplyEntry entry : entries) {
-                        charges += entry.getAmount();
+                        charges = BillingCalculator.addAmounts(charges, entry.getAmount());
                     }
                     totalCharges.setValue(charges);
 
@@ -89,10 +90,11 @@ public class SettlementViewModel extends ViewModel {
                     unlinkedPayments.setValue(payments);
                     double prevPayments = 0;
                     for (Payment p : payments) {
-                        prevPayments += p.getAmount();
+                        prevPayments = BillingCalculator.addAmounts(prevPayments, p.getAmount());
                     }
                     totalPreviousPayments.setValue(prevPayments);
-                    outstandingAmount.setValue(charges - prevPayments);
+                    outstandingAmount.setValue(
+                        BillingCalculator.normalizeAmount(charges - prevPayments));
                     isLoading.setValue(false);
                 }
 
@@ -127,7 +129,8 @@ public class SettlementViewModel extends ViewModel {
         if (prevPayments == null) prevPayments = 0.0;
         if (outstanding == null) outstanding = 0.0;
 
-        double adjustment = outstanding - amountReceived;
+        amountReceived = BillingCalculator.normalizeAmount(amountReceived);
+        double adjustment = BillingCalculator.normalizeAmount(outstanding - amountReceived);
         String adjustmentType;
         if (adjustment == 0) {
             adjustmentType = "EXACT";

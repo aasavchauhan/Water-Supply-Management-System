@@ -175,23 +175,28 @@ public class ReportGenerator {
         double totalBilled = 0;
         if (supplies != null) {
             for(SupplyEntry s : supplies) {
-                totalHours += s.getTotalTimeUsed() != null ? s.getTotalTimeUsed() : 0.0;
-                totalBilled += s.getAmount(); // Primitive
+                totalHours = BillingCalculator.addHours(totalHours,
+                    s.getTotalTimeUsed() != null ? s.getTotalTimeUsed() : 0.0);
+                totalBilled = BillingCalculator.addAmounts(totalBilled, s.getAmount());
             }
         }
         
         double totalPaid = 0;
         if (payments != null) {
-            for(Payment p : payments) totalPaid += p.getAmount(); // Primitive
+            for(Payment p : payments) {
+                totalPaid = BillingCalculator.addAmounts(totalPaid, p.getAmount());
+            }
         }
         
-        double pending = totalBilled - totalPaid;
+        double pending = BillingCalculator.normalizeAmount(totalBilled - totalPaid);
         
         int gap = 15;
         int cardW = (width - (2*margin) - (2*gap)) / 3;
         int cardH = 60; // Reduced height
         
-        drawCardV2(canvas, margin, y, cardW, cardH, "Total Supply", String.format("%.1f Hrs", totalHours), false, colorBorderCard, colorLightGray, colorDarkGray);
+        drawCardV2(canvas, margin, y, cardW, cardH, "Total Supply",
+            UsageHoursFormatter.format(totalHours) + " Hrs", false,
+            colorBorderCard, colorLightGray, colorDarkGray);
          // Count overlay
         paint.setColor(colorLightGray);
         paint.setTextSize(9);
@@ -199,9 +204,13 @@ public class ReportGenerator {
         paint.setTypeface(Typeface.DEFAULT);
         canvas.drawText(supplies.size() + " Entries", margin + cardW/2f, y + 50, paint);
         
-        drawCardV2(canvas, margin + cardW + gap, y, cardW, cardH, "Total Charges", "₹" + String.format(Locale.US, "%.0f", totalBilled), false, colorBorderCard, colorLightGray, colorDarkGray);
+        drawCardV2(canvas, margin + cardW + gap, y, cardW, cardH, "Total Charges",
+            CurrencyFormatter.format(totalBilled), false,
+            colorBorderCard, colorLightGray, colorDarkGray);
         
-        drawCardV2(canvas, margin + 2*(cardW + gap), y, cardW, cardH, "Pending Due", "₹" + String.format(Locale.US, "%.0f", pending), true, Color.TRANSPARENT, Color.argb(255, 255, 255, 255), Color.WHITE);
+        drawCardV2(canvas, margin + 2*(cardW + gap), y, cardW, cardH, "Pending Due",
+            CurrencyFormatter.format(pending), true, Color.TRANSPARENT,
+            Color.argb(255, 255, 255, 255), Color.WHITE);
         
         y += 80;
         
@@ -232,14 +241,15 @@ public class ReportGenerator {
                     
                     double hrs = s.getTotalTimeUsed() != null ? s.getTotalTimeUsed() : 0.0;
                     double rate = s.getRate(); // Primitive, safe
-                    i.details = String.format(Locale.US, "%.1f Hrs @ ₹%.0f/hr", hrs, rate);
+                    i.details = String.format(Locale.US, "%s Hrs @ ₹%.2f/hr",
+                        UsageHoursFormatter.format(hrs), rate);
                     
                     String fName = s.getFarmerName();
                     if ((fName == null || fName.isEmpty()) && s.getFarmerId() != null && farmerNameMap != null) {
                         fName = farmerNameMap.get(s.getFarmerId());
                     }
                     i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
-                    i.amount = s.getAmount(); // Primitive, safe
+                    i.amount = BillingCalculator.normalizeAmount(s.getAmount());
                     i.isPayment = false;
                     i.isSettled = "settled".equals(s.getSettlementStatus());
                     items.add(i);
@@ -257,7 +267,7 @@ public class ReportGenerator {
                         fName = farmerNameMap.get(p.getFarmerId());
                     }
                     i.farmerName = (fName != null && !fName.isEmpty()) ? fName : "Unknown";
-                    i.amount = p.getAmount(); // Primitive, safe
+                    i.amount = BillingCalculator.normalizeAmount(p.getAmount());
                     i.isPayment = true;
                     i.isSettled = p.getSettlementId() != null;
                     items.add(i);

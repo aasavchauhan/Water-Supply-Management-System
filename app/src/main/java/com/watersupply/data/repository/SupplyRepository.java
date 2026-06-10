@@ -9,6 +9,7 @@ import com.google.firebase.firestore.Query;
 import com.watersupply.data.firebase.FirebaseManager;
 import com.watersupply.data.firebase.FirestoreQueryLiveData;
 import com.watersupply.data.models.SupplyEntry;
+import com.watersupply.utils.BillingCalculator;
 
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class SupplyRepository {
                 double total = 0.0;
                 for (SupplyEntry entry : querySnapshot.toObjects(SupplyEntry.class)) {
                     if (entry.getTotalTimeUsed() != null) {
-                        total += entry.getTotalTimeUsed();
+                        total = BillingCalculator.addHours(total, entry.getTotalTimeUsed());
                     }
                 }
                 totalTimeLiveData.setValue(total);
@@ -106,7 +107,7 @@ public class SupplyRepository {
                 
                 double total = 0.0;
                 for (SupplyEntry entry : querySnapshot.toObjects(SupplyEntry.class)) {
-                    total += entry.getAmount();
+                    total = BillingCalculator.addAmounts(total, entry.getAmount());
                 }
                 revenueLiveData.setValue(total);
             });

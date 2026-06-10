@@ -11,6 +11,7 @@ import com.watersupply.data.repository.FarmerRepository;
 import com.watersupply.data.repository.SupplyRepository;
 import com.watersupply.data.repository.PaymentRepository;
 import com.watersupply.utils.DateFormatter;
+import com.watersupply.utils.BillingCalculator;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -216,7 +217,7 @@ public class DashboardViewModel extends ViewModel {
                 double revenue = 0.0;
                 for (SupplyEntry entry : entries) {
                     if (entry.getDate() != null && entry.getDate().startsWith(date)) {
-                        revenue += entry.getAmount();
+                        revenue = BillingCalculator.addAmounts(revenue, entry.getAmount());
                     }
                 }
                 trendData.put(label, revenue);
@@ -233,7 +234,7 @@ public class DashboardViewModel extends ViewModel {
                 double revenue = 0.0;
                 for (SupplyEntry entry : entries) {
                     if (entry.getDate() != null && entry.getDate().startsWith(date)) {
-                        revenue += entry.getAmount();
+                        revenue = BillingCalculator.addAmounts(revenue, entry.getAmount());
                     }
                 }
                 trendData.put(label, revenue);
@@ -260,9 +261,11 @@ public class DashboardViewModel extends ViewModel {
         for (SupplyEntry entry : entries) {
             if (entry.getDate() != null) {
                 if (entry.getDate().startsWith(currentMonth)) {
-                    currentMonthTotal += entry.getAmount();
+                    currentMonthTotal = BillingCalculator.addAmounts(
+                        currentMonthTotal, entry.getAmount());
                 } else if (entry.getDate().startsWith(lastMonth)) {
-                    lastMonthTotal += entry.getAmount();
+                    lastMonthTotal = BillingCalculator.addAmounts(
+                        lastMonthTotal, entry.getAmount());
                 }
             }
         }

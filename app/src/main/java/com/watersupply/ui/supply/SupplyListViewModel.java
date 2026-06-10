@@ -9,6 +9,7 @@ import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.data.repository.AuthRepository;
 import com.watersupply.data.repository.FarmerRepository;
 import com.watersupply.data.repository.SupplyRepository;
+import com.watersupply.utils.BillingCalculator;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -215,9 +216,9 @@ public class SupplyListViewModel extends ViewModel {
         
         for (SupplyEntry entry : entries) {
             if (entry.getTotalTimeUsed() != null) {
-                hours += entry.getTotalTimeUsed();
+                hours = BillingCalculator.addHours(hours, entry.getTotalTimeUsed());
             }
-            revenue += entry.getAmount();
+            revenue = BillingCalculator.addAmounts(revenue, entry.getAmount());
         }
         
         totalEntries.setValue(count);
