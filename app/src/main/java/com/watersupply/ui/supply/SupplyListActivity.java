@@ -20,6 +20,7 @@ import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.data.repository.FarmerRepository;
 import com.watersupply.utils.DateFormatter;
 import com.watersupply.utils.CurrencyFormatter;
+import com.watersupply.utils.UsageHoursFormatter;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -133,7 +134,8 @@ public class SupplyListActivity extends AppCompatActivity {
         });
         
         viewModel.getTotalHours().observe(this, hours -> {
-            binding.tvTotalHours.setText(String.format("%.2f hrs", hours != null ? hours : 0.0));
+            binding.tvTotalHours.setText(
+                UsageHoursFormatter.format(hours != null ? hours : 0.0) + " hrs");
         });
         
         viewModel.getTotalRevenue().observe(this, revenue -> {
@@ -239,11 +241,12 @@ public class SupplyListActivity extends AppCompatActivity {
                     writer.write("Date,Farmer,Billing Method,Time Used,Water Used,Rate,Amount\n");
                     
                     for (var entry : entries) {
-                        writer.write(String.format("%s,%s,%s,%.2f,%.2f,%.2f,%.2f\n",
+                        writer.write(String.format(Locale.US, "%s,%s,%s,%s,%.2f,%.2f,%.2f\n",
                             entry.getDate(),
                             entry.getFarmerName() != null ? entry.getFarmerName() : "Unknown",
                             entry.getBillingMethod(),
-                            entry.getTotalTimeUsed() != null ? entry.getTotalTimeUsed() : 0.0,
+                            UsageHoursFormatter.format(
+                                entry.getTotalTimeUsed() != null ? entry.getTotalTimeUsed() : 0.0),
                             entry.getTotalWaterUsed() != null ? entry.getTotalWaterUsed() : 0.0,
                             entry.getRate(),
                             entry.getAmount()));

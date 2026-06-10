@@ -12,6 +12,7 @@ import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.databinding.ItemSupplyEntryBinding;
 import com.watersupply.utils.CurrencyFormatter;
 import com.watersupply.utils.DateFormatter;
+import com.watersupply.utils.UsageHoursFormatter;
 
 import java.util.Locale;
 
@@ -96,7 +97,7 @@ public class SupplyEntryAdapter extends ListAdapter<SupplyEntry, SupplyEntryAdap
             
             if (entry.getTotalTimeUsed() != null) {
                 binding.tvUsage.setText(
-                    String.format(Locale.getDefault(), "%.2f hours", entry.getTotalTimeUsed())
+                    UsageHoursFormatter.format(entry.getTotalTimeUsed()) + " hours"
                 );
             } else {
                 binding.tvUsage.setText("--");

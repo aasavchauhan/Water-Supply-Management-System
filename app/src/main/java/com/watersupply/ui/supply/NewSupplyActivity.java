@@ -222,7 +222,8 @@ public class NewSupplyActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if (!s.toString().isEmpty()) {
                     try {
-                        pauseDuration = Double.parseDouble(s.toString());
+                        pauseDuration = BillingCalculator.normalizeHours(
+                            Double.parseDouble(s.toString()));
                     } catch (NumberFormatException e) {
                         pauseDuration = 0.0;
                     }
@@ -291,11 +292,7 @@ public class NewSupplyActivity extends AppCompatActivity {
         try {
             if (startTime != null && stopTime != null && !binding.etTimeRate.getText().toString().isEmpty()) {
                 double hours = BillingCalculator.calculateHoursFromTime(startTime, stopTime);
-                double effectiveHours = hours - pauseDuration;
-                
-                if (effectiveHours < 0) {
-                    effectiveHours = 0;
-                }
+                double effectiveHours = BillingCalculator.subtractPause(hours, pauseDuration);
                 
                 double rate = Double.parseDouble(binding.etTimeRate.getText().toString());
                 double amount = BillingCalculator.calculateAmount(effectiveHours, rate);
@@ -319,9 +316,7 @@ public class NewSupplyActivity extends AppCompatActivity {
                 double end = Double.parseDouble(endStr);
                 double rate = Double.parseDouble(rateStr);
                 
-                double startHours = BillingCalculator.convertMeterToHours(start);
-                double endHours = BillingCalculator.convertMeterToHours(end);
-                double hours = endHours - startHours;
+                double hours = BillingCalculator.calculateMeterUsage(start, end);
                 
                 if (hours < 0) {
                     binding.tilMeterEnd.setError("End reading must be greater than start");
@@ -389,11 +384,12 @@ public class NewSupplyActivity extends AppCompatActivity {
                 // Only calculate if stop time is present or not a draft
                 if (startTime != null && stopTime != null) {
                     double hours = BillingCalculator.calculateHoursFromTime(startTime, stopTime);
-                    entry.setTotalTimeUsed(hours - pauseDuration);
+                    entry.setTotalTimeUsed(BillingCalculator.subtractPause(hours, pauseDuration));
                     
                     String rateStr = binding.etTimeRate.getText().toString();
                     if (!rateStr.isEmpty()) {
-                        entry.setRate(Double.parseDouble(rateStr));
+                        entry.setRate(BillingCalculator.normalizeAmount(
+                            Double.parseDouble(rateStr)));
                         entry.setAmount(BillingCalculator.calculateAmount(entry.getTotalTimeUsed(), entry.getRate()));
                     }
                 } else if ("completed".equals(status)) {
@@ -402,7 +398,10 @@ public class NewSupplyActivity extends AppCompatActivity {
                 } else {
                     // Draft with partial data
                     String rateStr = binding.etTimeRate.getText().toString();
-                    if (!rateStr.isEmpty()) entry.setRate(Double.parseDouble(rateStr));
+                    if (!rateStr.isEmpty()) {
+                        entry.setRate(BillingCalculator.normalizeAmount(
+                            Double.parseDouble(rateStr)));
+                    }
                 }
                 
                 String remarks = binding.etTimeRemarks.getText().toString();
@@ -430,15 +429,22 @@ public class NewSupplyActivity extends AppCompatActivity {
                     binding.tilMeterEnd.setError("End reading required");
                     return;
                 }
+
+                if (entry.getMeterReadingStart() != null
+                    && entry.getMeterReadingEnd() != null
+                    && entry.getMeterReadingEnd() < entry.getMeterReadingStart()) {
+                    binding.tilMeterEnd.setError("End reading must be greater than start");
+                    return;
+                }
                 
                 if (!rateStr.isEmpty()) {
-                    entry.setRate(Double.parseDouble(rateStr));
+                    entry.setRate(BillingCalculator.normalizeAmount(
+                        Double.parseDouble(rateStr)));
                 }
                 
                 if (entry.getMeterReadingStart() != null && entry.getMeterReadingEnd() != null && entry.getRate() > 0) {
-                    double startHours = BillingCalculator.convertMeterToHours(entry.getMeterReadingStart());
-                    double endHours = BillingCalculator.convertMeterToHours(entry.getMeterReadingEnd());
-                    entry.setTotalTimeUsed(endHours - startHours);
+                    entry.setTotalTimeUsed(BillingCalculator.calculateMeterUsage(
+                        entry.getMeterReadingStart(), entry.getMeterReadingEnd()));
                     entry.setAmount(BillingCalculator.calculateAmount(entry.getTotalTimeUsed(), entry.getRate()));
                 }
                 

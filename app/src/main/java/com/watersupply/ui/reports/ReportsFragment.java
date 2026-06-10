@@ -26,6 +26,9 @@ import com.watersupply.databinding.FragmentReportsBinding;
 import com.watersupply.data.models.Farmer;
 import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.data.models.Payment;
+import com.watersupply.utils.BillingCalculator;
+import com.watersupply.utils.CurrencyFormatter;
+import com.watersupply.utils.UsageHoursFormatter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -119,8 +122,10 @@ public class ReportsFragment extends Fragment {
                 boolean isDraft = "draft".equalsIgnoreCase(entry.getStatus());
                 if (entryDate != null && !isDraft && !entryDate.before(start) && !entryDate.after(end)) {
                     filteredSupplyEntries.add(entry);
-                    if (entry.getTotalTimeUsed() != null) totalHours += entry.getTotalTimeUsed();
-                    totalCharges += entry.getAmount();
+                    if (entry.getTotalTimeUsed() != null) {
+                        totalHours = BillingCalculator.addHours(totalHours, entry.getTotalTimeUsed());
+                    }
+                    totalCharges = BillingCalculator.addAmounts(totalCharges, entry.getAmount());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -133,7 +138,7 @@ public class ReportsFragment extends Fragment {
                 Date paymentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(payment.getPaymentDate());
                 if (paymentDate != null && !paymentDate.before(start) && !paymentDate.after(end)) {
                     filteredPayments.add(payment);
-                    totalCollection += payment.getAmount();
+                    totalCollection = BillingCalculator.addAmounts(totalCollection, payment.getAmount());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -141,9 +146,9 @@ public class ReportsFragment extends Fragment {
         }
         
         // Update UI
-        binding.tvReportTotalHours.setText(String.format("%.1f", totalHours));
-        binding.tvReportTotalCharges.setText("₹" + (int)totalCharges);
-        binding.tvReportCollection.setText("₹" + (int)totalCollection);
+        binding.tvReportTotalHours.setText(UsageHoursFormatter.format(totalHours));
+        binding.tvReportTotalCharges.setText(CurrencyFormatter.format(totalCharges));
+        binding.tvReportCollection.setText(CurrencyFormatter.format(totalCollection));
         
         updateChartData();
     }
@@ -288,15 +293,19 @@ public class ReportsFragment extends Fragment {
         for (SupplyEntry entry : filteredSupplyEntries) {
             csvData.append(entry.getDate()).append(",")
                    .append("Supply").append(",")
-                   .append(entry.getTotalTimeUsed()).append(" hrs").append(",")
-                   .append(entry.getAmount()).append("\n");
+                   .append(UsageHoursFormatter.format(
+                       entry.getTotalTimeUsed() != null ? entry.getTotalTimeUsed() : 0.0))
+                   .append(" hrs").append(",")
+                   .append(String.format(Locale.US, "%.2f",
+                       BillingCalculator.normalizeAmount(entry.getAmount()))).append("\n");
         }
         
         for (Payment payment : filteredPayments) {
             csvData.append(payment.getPaymentDate()).append(",")
                    .append("Payment").append(",")
                    .append(payment.getPaymentMethod()).append(",")
-                   .append(payment.getAmount()).append("\n");
+                   .append(String.format(Locale.US, "%.2f",
+                       BillingCalculator.normalizeAmount(payment.getAmount()))).append("\n");
         }
         
         try {
@@ -388,12 +397,16 @@ public class ReportsFragment extends Fragment {
                 if (fName.length() > 12) fName = fName.substring(0, 10) + ".."; // Truncate
                 canvas.drawText(fName, 130, y, paint);
                 canvas.drawText(typeStr, 230, y, paint);
-                canvas.drawText(String.format("%.1f hrs", entry.getTotalTimeUsed()), 300, y, paint);
+                canvas.drawText(UsageHoursFormatter.format(
+                    entry.getTotalTimeUsed() != null ? entry.getTotalTimeUsed() : 0.0) + " hrs",
+                    300, y, paint);
                 canvas.drawText(String.format("₹%.2f", entry.getAmount()), 480, y, paint);
             } else {
                 canvas.drawText(entry.getDate(), 50, y, paint);
                 canvas.drawText(typeStr, 150, y, paint);
-                canvas.drawText(String.format("%.1f hrs", entry.getTotalTimeUsed()), 250, y, paint);
+                canvas.drawText(UsageHoursFormatter.format(
+                    entry.getTotalTimeUsed() != null ? entry.getTotalTimeUsed() : 0.0) + " hrs",
+                    250, y, paint);
                 canvas.drawText(String.format("₹%.2f", entry.getAmount()), 450, y, paint);
             }
             y += 25;

@@ -8,7 +8,8 @@ import java.util.Locale;
 public class CurrencyFormatter {
     
     public static String format(double amount, String symbol) {
-        return String.format(Locale.getDefault(), "%s%.2f", symbol, amount);
+        return String.format(Locale.getDefault(), "%s%.2f", symbol,
+            BillingCalculator.normalizeAmount(amount));
     }
     
     public static String format(double amount) {

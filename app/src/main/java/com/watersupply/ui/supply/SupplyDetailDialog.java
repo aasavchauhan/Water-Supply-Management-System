@@ -14,6 +14,7 @@ import com.watersupply.data.models.SupplyEntry;
 import com.watersupply.databinding.DialogSupplyDetailBinding;
 import com.watersupply.utils.CurrencyFormatter;
 import com.watersupply.utils.DateFormatter;
+import com.watersupply.utils.UsageHoursFormatter;
 
 import java.util.Locale;
 
@@ -137,7 +138,8 @@ public class SupplyDetailDialog extends BottomSheetDialogFragment {
         }
         
         if (entry.getTotalTimeUsed() != null) {
-            binding.tvTotalHours.setText(String.format(Locale.getDefault(), "%.2f hours", entry.getTotalTimeUsed()));
+            binding.tvTotalHours.setText(
+                UsageHoursFormatter.format(entry.getTotalTimeUsed()) + " hours");
         }
         
         binding.tvRate.setText(CurrencyFormatter.format(entry.getRate()) + "/hour");
