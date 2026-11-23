@@ -5,7 +5,7 @@ Thank you for your interest in contributing to the **Water Supply Management** p
 ## 🚀 How to Contribute
 
 ### 1. Reporting Bugs
-- Check the [Issues](https://github.com/aasavchauhan/WaterSupplyManagement/issues) tab to see if the bug has already been reported.
+- Check the [Issues](https://github.com/aasavchauhan/Water-Supply-Management-System/issues) tab to see if the bug has already been reported.
 - If not, create a new issue using the **Bug Report** template.
 - Provide clear steps to reproduce the issue.
 
